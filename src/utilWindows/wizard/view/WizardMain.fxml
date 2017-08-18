@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="mainContainer" prefHeight="500.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="utilWindows.wizard.controller.WizardController">
+   <children>
+      <ToolBar nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="200.0">
+        <items>
+          <Button fx:id="cancelBtn" mnemonicParsing="false" onAction="#cancelWizard" text="Abbrechen" />
+            <Button fx:id="nextBtn" mnemonicParsing="false" onAction="#nextPane" text="Weiter" />
+            <Button fx:id="backBtn" mnemonicParsing="false" onAction="#previousPane" text="Zurück" />
+        </items>
+      </ToolBar>
+   </children>
+</VBox>

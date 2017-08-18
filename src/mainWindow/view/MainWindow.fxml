@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.media.*?>
+<?import javafx.scene.input.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="800.0" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mainWindow.controller.MainWindowController">
+	<top>
+		<VBox>
+			<children>
+				<MenuBar BorderPane.alignment="CENTER">
+					<menus>
+						<Menu mnemonicParsing="false" text="File">
+							<items>
+                        <MenuItem mnemonicParsing="false" onAction="#importPhotos" text="Importiere Dateien">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="I" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator>
+                        </MenuItem>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" onAction="#openSettingsWindow" text="Einstellungen">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator>
+                        </MenuItem>
+								<MenuItem mnemonicParsing="false" onAction="#close" text="Close">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="E" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+							</items>
+						</Menu>
+						<Menu mnemonicParsing="false" text="Edit">
+							<items>
+								<MenuItem mnemonicParsing="false" text="Delete" />
+							</items>
+						</Menu>
+						<Menu mnemonicParsing="false" text="Help">
+							<items>
+								<MenuItem mnemonicParsing="false" text="About" />
+							</items>
+						</Menu>
+					</menus>
+				</MenuBar>
+				<ToolBar prefHeight="40.0" prefWidth="200.0">
+					<items>
+						<Button mnemonicParsing="false" onAction="#importPhotos" text="Bilder importieren" />
+					</items>
+					<VBox.margin>
+						<Insets />
+					</VBox.margin>
+					<padding>
+						<Insets left="10.0" />
+					</padding>
+				</ToolBar>
+			</children>
+		</VBox>
+	</top>
+	<right>
+		<VBox maxWidth="300.0" prefHeight="735.0" prefWidth="275.0" spacing="5.0" BorderPane.alignment="CENTER">
+			<children>
+            <AnchorPane prefHeight="361.0" prefWidth="266.0">
+               <children>
+                  <VBox prefHeight="320.0" prefWidth="290.0" spacing="5.0">
+                     <children>
+                        <Label prefHeight="17.0" prefWidth="260.0" text="Suche nach Dateien in der Liste">
+                           <VBox.margin>
+                              <Insets left="5.0" top="5.0" />
+                           </VBox.margin>
+                        </Label>
+                        <HBox layoutX="13.0" layoutY="8.0" spacing="10.0">
+                           <children>
+                              <TextField fx:id="searchFileTextField" layoutX="13.0" layoutY="8.0" prefHeight="25.0" prefWidth="204.0" promptText="Suche nach Dateien">
+                                 <HBox.margin>
+                                    <Insets left="5.0" />
+                                 </HBox.margin>
+                              </TextField>
+                              <Button fx:id="searchFileBtn" layoutX="203.0" layoutY="8.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="62.0" text="Suche" />
+                           </children>
+                           <VBox.margin>
+                              <Insets top="5.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <Label text="Vorherige Suchbegriffe">
+                           <VBox.margin>
+                              <Insets left="5.0" top="5.0" />
+                           </VBox.margin>
+                        </Label>
+                        <ComboBox fx:id="prevSearchComboBox" prefWidth="150.0">
+                           <VBox.margin>
+                              <Insets left="5.0" />
+                           </VBox.margin>
+                        </ComboBox>
+                        <Separator prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="15.0" />
+                           </VBox.margin>
+                        </Separator>
+                        <Label fx:id="pictureInfoLabel" layoutX="13.0" layoutY="42.0" maxWidth="275.0" prefHeight="143.0" prefWidth="266.0" />
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+            <Separator prefWidth="200.0" />
+				<ImageView fx:id="thumbnailView" fitHeight="330.0" fitWidth="250.0" pickOnBounds="true" preserveRatio="true" />
+			</children>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+		</VBox>
+	</right>
+	<center>
+		<TableView fx:id="mainTableView" prefHeight="704.0" prefWidth="767.0" tableMenuButtonVisible="true" BorderPane.alignment="CENTER">
+			<columns>
+				<TableColumn fx:id="fileNameColumn" editable="false" text="Dateinamen" />
+				<TableColumn fx:id="tagsColumn" sortable="false" text="Schlagworte" />
+            <TableColumn fx:id="addedColumn" text="Hinzugefügt am" />
+			</columns>
+			<BorderPane.margin>
+				<Insets left="10.0" top="10.0" />
+			</BorderPane.margin>
+		</TableView>
+	</center>
+	<left>
+		<VBox prefHeight="735.0" prefWidth="148.0" spacing="10.0">
+			<children>
+				<Label text="Dateien Filter">
+					<VBox.margin>
+						<Insets left="10.0" top="10.0" />
+					</VBox.margin>
+				</Label>
+            <Separator prefWidth="200.0">
+               <VBox.margin>
+                  <Insets left="5.0" />
+               </VBox.margin>
+            </Separator>
+            <CheckBox fx:id="filterExclusiv" mnemonicParsing="false" text="Filtere exclusiv">
+               <VBox.margin>
+                  <Insets left="10.0" />
+               </VBox.margin>
+            </CheckBox>
+				<ListView fx:id="filterListView" prefHeight="641.0" prefWidth="176.0" BorderPane.alignment="CENTER">
+					<BorderPane.margin>
+						<Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+					</BorderPane.margin>
+					<VBox.margin>
+						<Insets left="10.0" />
+					</VBox.margin>
+				</ListView>
+            <Label text="Verschiebe Filter">
+               <VBox.margin>
+                  <Insets left="10.0" />
+               </VBox.margin>
+            </Label>
+				<ToolBar prefHeight="40.0" prefWidth="200.0">
+					<items>
+						<Button fx:id="upBtn" mnemonicParsing="false" onAction="#moveItemUp" text="Up" />
+						<Button fx:id="downBtn" mnemonicParsing="false" onAction="#moveItemDown" text="Down" />
+					</items>
+					<VBox.margin>
+						<Insets />
+					</VBox.margin>
+				</ToolBar>
+			</children>
+		</VBox>
+	</left>
+   <bottom>
+      <VBox>
+         <children>
+            <Separator fx:id="bottomSeparator" prefWidth="200.0">
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </VBox.margin>
+            </Separator>
+            <HBox spacing="5.0">
+               <children>
+                  <Label fx:id="mainFolderLabel" prefHeight="17.0" prefWidth="1027.0" text="Speicherort: C:\..." BorderPane.alignment="CENTER" />
+                  <Label fx:id="numOfFilesLabel" alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="816.0" text="# Dateien" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </HBox>
+         </children>
+      </VBox>
+   </bottom>
+</BorderPane>

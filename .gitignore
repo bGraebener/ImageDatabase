@@ -1,0 +1,4 @@
+bin/
+photoFolder/
+target/
+build*
