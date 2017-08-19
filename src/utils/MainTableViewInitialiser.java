@@ -205,20 +205,22 @@ public class MainTableViewInitialiser {
 		MenuItem editTags = new MenuItem("Bearbeite Schlagworte");
 		editTags.setOnAction(x -> {
 
+			int initialIndex = mainTableView.getSelectionModel().getSelectedIndex();
+			
 			TagsEditorDialog tagsEditor = new TagsEditorDialog(mainTableView.getSelectionModel().getSelectedItems(),
 					new ArrayList<String>(mainWindowController.getFilterList()));
 			List<String> newTags = tagsEditor.getNewTags();
 
 			if (newTags != null) {
 
-				newTags.stream().filter(newTag -> !mainWindowController.getFilterList().contains(newTag))
+				newTags.stream().filter(newTag -> !mainWindowController.getFilterList().contains(newTag) && !newTag.equals(""))
 						.forEach(mainWindowController.getFilterList()::add);
 			}
 
-			//cheat to update the tagsList and make it visible
+			//cheat to update the tagsList and make the changes visible
 			mainWindowController.getFilterListView().getSelectionModel().clearAndSelect(1);
 			mainWindowController.getFilterListView().getSelectionModel().clearAndSelect(0);
-			mainTableView.getSelectionModel().clearAndSelect(0);
+			mainTableView.getSelectionModel().clearAndSelect(initialIndex);
 		});
 
 		MenuItem deleteItems = new MenuItem("Markierte Dateien löschen");

@@ -13,9 +13,9 @@
 	<top>
 		<VBox>
 			<children>
-				<MenuBar BorderPane.alignment="CENTER">
+				<MenuBar>
 					<menus>
-						<Menu mnemonicParsing="false" text="File">
+						<Menu mnemonicParsing="false" text="Datei">
 							<items>
                         <MenuItem mnemonicParsing="false" onAction="#importPhotos" text="Importiere Dateien">
                            <accelerator>
@@ -23,18 +23,18 @@
                            </accelerator>
                         </MenuItem>
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#openSettingsWindow" text="Einstellungen">
+<!--                         <MenuItem mnemonicParsing="false" onAction="#openSettingsWindow" text="Einstellungen">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator>
-                        </MenuItem>
-								<MenuItem mnemonicParsing="false" onAction="#close" text="Close">
+                        </MenuItem>  -->
+								<MenuItem mnemonicParsing="false" onAction="#close" text="Beenden">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="E" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator></MenuItem>
 							</items>
 						</Menu>
-						<Menu mnemonicParsing="false" text="Edit">
+<!-- 						<Menu mnemonicParsing="false" text="Edit">
 							<items>
 								<MenuItem mnemonicParsing="false" text="Delete" />
 							</items>
@@ -43,8 +43,14 @@
 							<items>
 								<MenuItem mnemonicParsing="false" text="About" />
 							</items>
-						</Menu>
+						</Menu>   -->
 					</menus>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <padding>
+                  <Insets left="-3.0" />
+               </padding>
 				</MenuBar>
 				<ToolBar prefHeight="40.0" prefWidth="200.0">
 					<items>
@@ -53,9 +59,6 @@
 					<VBox.margin>
 						<Insets />
 					</VBox.margin>
-					<padding>
-						<Insets left="10.0" />
-					</padding>
 				</ToolBar>
 			</children>
 		</VBox>

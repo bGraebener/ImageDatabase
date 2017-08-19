@@ -9,6 +9,7 @@ import java.util.List;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import mainWindow.controller.MainWindowController;
@@ -34,6 +35,7 @@ public class Main extends Application {
 			
 			primaryStage.setScene(scene);
 			primaryStage.setTitle("Photo Organiser");
+			primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/res/icon.png")));
 			
 			
 			primaryStage.show();

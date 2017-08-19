@@ -10,20 +10,23 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.Photo;
+import utils.BasicOperations;
 
 //XXX existing tags don't have to be in listview, could be in label
 //DONE add new tag to current tags list
@@ -66,8 +69,6 @@ public class TagsEditorDialog {
 		mainVBox.setPrefWidth(407);
 		mainVBox.setPadding(new Insets(10));
 
-		Label title = new Label("Schlagworte editieren");
-
 		Label selectedTagsLabel = new Label("Alle Schlagwörter der gewählten Photos");
 		selectedTagsLabel.setPrefWidth(200);
 		selectedTagsLabel.setWrapText(true);
@@ -76,7 +77,7 @@ public class TagsEditorDialog {
 		allCurrentLabel.setPrefWidth(200);
 
 		HBox labelBox = new HBox(10);
-		labelBox.setPrefHeight(150);
+		labelBox.setPrefHeight(120);
 		labelBox.getChildren().addAll(selectedTagsLabel, allCurrentLabel);
 
 		ListView<String> selectedPhotoTagsView = new ListView<>();
@@ -90,14 +91,17 @@ public class TagsEditorDialog {
 		listBox.getChildren().addAll(selectedPhotoTagsView, allCurrentTagsView);
 
 		Button removeBtn = new Button("Schlagwort(e) entfernen");
-		removeBtn.setAlignment(Pos.CENTER_RIGHT);
-		removeBtn.setTextAlignment(TextAlignment.CENTER);
+//		removeBtn.setAlignment(Pos.CENTER_RIGHT);
+//		removeBtn.setTextAlignment(TextAlignment.CENTER);
 		removeBtn.setOnAction((event) -> {
 			// FIXME checke ob filter danach noch existieren
 			// DONE remove tag implementieren
 			List<String> selectedTags = selectedPhotoTagsView.getSelectionModel().getSelectedItems();
 
 			selectedPhotos.forEach(photo -> photo.getTags().removeAll(selectedTags));
+			
+			Alert alert = BasicOperations.showInformationAlert("Schlagwörter entfernt", null, "Die ausgewählten Schlagwörter wurden entfernt.");
+			alert.show();
 
 		});
 
@@ -121,7 +125,7 @@ public class TagsEditorDialog {
 			stage.close();
 		});
 
-		mainVBox.getChildren().addAll(title, labelBox, listBox, removeBtn, textFieldLabel, textField, addBtn);
+		mainVBox.getChildren().addAll(labelBox, listBox, removeBtn, textFieldLabel, textField, addBtn);
 
 		root.getChildren().add(mainVBox);
 
@@ -136,15 +140,15 @@ public class TagsEditorDialog {
 	}
 
 	/**
-	 * Adds the new tags to photos in the main TableView and to the ListView in the
-	 * editor window. Allows for input of multiple tags at once.
+	 * Adds the new tags to photos in the main TableView and to the ListView in
+	 * the editor window. Allows for input of multiple tags at once.
 	 */
 	private void addTags() {
 		// DONE empty tags get added, why?
 		newTagsFromTextField = Arrays.asList(textField.getText().replaceAll("\\s*", "").split(","));
 
 		Set<String> tmp = new TreeSet<>(allCurrentTagsView.getSelectionModel().getSelectedItems());
-		tmp.addAll(newTagsFromTextField);
+		newTagsFromTextField.stream().filter(tag -> !tag.equals("")).forEach(tmp::add);
 
 		// Add tags to the selected photos in the main photolist if the tag is
 		// not yet set for that photo
@@ -155,25 +159,21 @@ public class TagsEditorDialog {
 
 		});
 
-		// Add tags to ListView in the dialog window if they not yet exist
-		tmp.stream().filter(newTag -> !selectedPhotoTagsList.contains(newTag)).forEach(selectedPhotoTagsList::add);
-
-		Alert addedTagAlert = new Alert(AlertType.CONFIRMATION);
-		addedTagAlert.setTitle("Schlagworte hinzugefügt");
-		addedTagAlert.setHeaderText(null);
-		addedTagAlert.setContentText("Hinzugefügte Schlagworte: " + tmp.toString().replaceAll("\\[|\\]", ""));
+		Alert addedTagAlert = BasicOperations.showConfirmationAlert("Schlagworte hinzugefügt", null,
+				"Hinzugefügte Schlagworte: " + tmp.toString().replaceAll("\\[|\\]", ""));
 		addedTagAlert.show();
 
 	}
 
 	/**
-	 * Displays the TagsEditorDialog and waits until it's closed before returning
-	 * control.
+	 * Displays the TagsEditorDialog and waits until it's closed before
+	 * returning control.
 	 */
 	public void showTagsDialog() {
 
 		Scene scene = new Scene(initialise());
 		stage = new Stage();
+		stage.setTitle("Schlagworte editieren");
 
 		scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
 
