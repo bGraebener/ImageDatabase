@@ -17,17 +17,13 @@
 					<menus>
 						<Menu mnemonicParsing="false" text="Datei">
 							<items>
-                        <MenuItem mnemonicParsing="false" onAction="#importPhotos" text="Importiere Dateien">
-                           <accelerator>
-                              <KeyCodeCombination alt="UP" code="I" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                           </accelerator>
-                        </MenuItem>
+                        <MenuItem fx:id="importPhotosMenuItem" mnemonicParsing="false" onAction="#importPhotos" text="Importiere Dateien" />
                         <SeparatorMenuItem mnemonicParsing="false" />
-<!--                         <MenuItem mnemonicParsing="false" onAction="#openSettingsWindow" text="Einstellungen">
+                        <MenuItem mnemonicParsing="false" onAction="#openSettingsWindow" text="Einstellungen">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator>
-                        </MenuItem>  -->
+                        </MenuItem>  
 								<MenuItem mnemonicParsing="false" onAction="#close" text="Beenden">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="E" control="DOWN" meta="UP" shift="UP" shortcut="UP" />

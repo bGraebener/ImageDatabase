@@ -2,18 +2,32 @@ package utils;
 
 import java.awt.Desktop;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.TransferMode;
 import mainWindow.controller.MainWindowController;
 import model.Photo;
@@ -54,12 +68,12 @@ public class MainTableViewInitialiser {
 
 	/**
 	 * Initialises the TableView that holds the list of photo. A listener is
-	 * attached to the main table that manages the displaying of the thumbnail of
-	 * the selected item . If multiple photos are selected, no thumbnail is
+	 * attached to the main table that manages the displaying of the thumbnail
+	 * of the selected item . If multiple photos are selected, no thumbnail is
 	 * displayed. A DoubleClickHandler creates a new window that displays the
 	 * selected picture in full view mode. Every cell of the TableView detects a
-	 * mouse hover event and attaches a Tooltip with information about the photo it
-	 * contains to itself.
+	 * mouse hover event and attaches a Tooltip with information about the photo
+	 * it contains to itself.
 	 * 
 	 * @param photoList
 	 * 
@@ -109,7 +123,8 @@ public class MainTableViewInitialiser {
 		mainTableView.setOnDragOver(de -> {
 			Dragboard db = de.getDragboard();
 
-			if (db.hasFiles() && db.getFiles().stream().allMatch(file -> file.getName().endsWith(".jpg"))) {
+			if (db.hasFiles() && db.getFiles().stream().allMatch(file -> file.getName().endsWith(".jpg")
+					|| file.getName().endsWith(".gif") || file.getName().endsWith(".png"))) {
 				de.acceptTransferModes(TransferMode.COPY);
 			}
 			de.consume();
@@ -122,22 +137,16 @@ public class MainTableViewInitialiser {
 			if (db.hasFiles()) {
 				// DONE copy actual files and allow for tags to be set
 				// TODO show pictures in question
-				// ImportPreviewDialog ipd = new ImportPreviewDialog(db.getFiles());
+				// ImportPreviewDialog ipd = new
+				// ImportPreviewDialog(db.getFiles());
 				// List<String> newTags = ipd.showImportPhotosDialog();
 
-				List<String> newTags = BasicOperations.getNewTags();
+				// List<String> newTags = BasicOperations.getNewTags();
 				db.getFiles().stream().filter(file -> file.exists()).forEach(droppedPhoto -> {
 
 					Optional<Photo> possiblePhoto = BasicOperations.copyFile(new Photo(droppedPhoto.toPath()));
 
-					if (possiblePhoto.isPresent()) {
-
-						possiblePhoto.get().getTags().addAll(newTags);
-						photoList.add(possiblePhoto.get());
-
-						newTags.stream().filter(tag -> !mainWindowController.getFilterList().contains(tag))
-								.forEach(mainWindowController.getFilterList()::add);
-					}
+					possiblePhoto.ifPresent(photoList::add);
 
 				});
 				success = true;
@@ -203,21 +212,24 @@ public class MainTableViewInitialiser {
 	private ContextMenu createMainTableContextMenu() {
 
 		MenuItem editTags = new MenuItem("Bearbeite Schlagworte");
+		editTags.setAccelerator(KeyCombination.keyCombination(
+				PropertiesInitialiser.getEditTagsModifier() + "+" + PropertiesInitialiser.getEditTagsKeyCode()));
 		editTags.setOnAction(x -> {
 
 			int initialIndex = mainTableView.getSelectionModel().getSelectedIndex();
-			
+
 			TagsEditorDialog tagsEditor = new TagsEditorDialog(mainTableView.getSelectionModel().getSelectedItems(),
 					new ArrayList<String>(mainWindowController.getFilterList()));
 			List<String> newTags = tagsEditor.getNewTags();
 
 			if (newTags != null) {
 
-				newTags.stream().filter(newTag -> !mainWindowController.getFilterList().contains(newTag) && !newTag.equals(""))
+				newTags.stream()
+						.filter(newTag -> !mainWindowController.getFilterList().contains(newTag) && !newTag.equals(""))
 						.forEach(mainWindowController.getFilterList()::add);
 			}
 
-			//cheat to update the tagsList and make the changes visible
+			// cheat to update the tagsList and make the changes visible
 			mainWindowController.getFilterListView().getSelectionModel().clearAndSelect(1);
 			mainWindowController.getFilterListView().getSelectionModel().clearAndSelect(0);
 			mainTableView.getSelectionModel().clearAndSelect(initialIndex);
@@ -233,6 +245,8 @@ public class MainTableViewInitialiser {
 		});
 
 		MenuItem showExifData = new MenuItem("Photo Informationen anzeigen");
+		showExifData.setAccelerator(KeyCombination.keyCombination(
+				PropertiesInitialiser.getPhotoInfoShortCutModifier() + "+" + PropertiesInitialiser.getPhotoInfoShortCutKeyCode()));
 		showExifData.setOnAction(x -> {
 			if (mainTableView.getSelectionModel().getSelectedItems().size() > 1) {
 				Alert alert = BasicOperations.showErrorAlert("Multiple Dateien ausgewählt", null,
@@ -242,11 +256,13 @@ public class MainTableViewInitialiser {
 			}
 			EXIFWindow exifWindow = new EXIFWindow(mainTableView.getSelectionModel().getSelectedItem());
 			exifWindow.showExifWindow();
-			
-//			BasicOperations.showExifData(mainTableView.getSelectionModel().getSelectedItems());
+
+			// BasicOperations.showExifData(mainTableView.getSelectionModel().getSelectedItems());
 		});
 
 		MenuItem renameFile = new MenuItem("Datei umbenennen");
+		renameFile.setAccelerator(KeyCombination.keyCombination(
+				PropertiesInitialiser.getRenameShortCutModifier() + "+" + PropertiesInitialiser.getRenameShortCutKeyCode()));
 		renameFile.setOnAction(x -> {
 			if (mainTableView.getSelectionModel().getSelectedItems().size() > 1) {
 				Alert alert = BasicOperations.showErrorAlert("Multiple Dateien ausgewählt", null,
@@ -271,20 +287,65 @@ public class MainTableViewInitialiser {
 		MenuItem showInExplorer = new MenuItem("In System Explorer anzeigen");
 		showInExplorer.setOnAction(x -> {
 			Desktop desktop = Desktop.getDesktop();
-			Properties properties = new Properties();
 			try {
-				properties.load(new FileInputStream("res/config.properties"));
-				desktop.open(new File(properties.getProperty("mainFolder")));
+				desktop.open(new File(PropertiesInitialiser.getMainFolder()));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		});
 
+		Menu openInPlugin = new Menu("Öffnen mit...");
+
+		MenuItem systemPlugin = new MenuItem("System App");
+		systemPlugin.setOnAction(event -> {
+
+			Desktop desktop = Desktop.getDesktop();
+
+			try {
+				desktop.open(new File(mainTableView.getSelectionModel().getSelectedItem().getLocation().get()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+
+		openInPlugin.getItems().add(systemPlugin);
+
+		String pluginName = null;
+		pluginName = PropertiesInitialiser.getExternalName();
+		String pluginPath = PropertiesInitialiser.getExternalPath();
+
+		if (pluginName != null && !pluginName.isEmpty() && pluginPath != null && !pluginPath.isEmpty()) {
+
+			MenuItem esternalPlugin = new MenuItem(pluginName);
+			esternalPlugin.setOnAction(event -> {
+
+				List<String> files = mainTableView.getSelectionModel().getSelectedItems().stream()
+						.map(photo -> photo.getPath().toAbsolutePath().toString()).collect(Collectors.toList());
+
+				files.add(0, pluginPath);
+
+				ProcessBuilder pb = new ProcessBuilder(files);
+
+				try {
+					pb.start();
+				} catch (IOException e) {
+					Alert alert = new Alert(AlertType.ERROR);
+					TextArea area = new TextArea(e.getMessage());
+					e.printStackTrace();
+					alert.getDialogPane().setExpandableContent(area);
+					alert.show();
+				}
+			});
+
+			openInPlugin.getItems().add(esternalPlugin);
+
+		}
+
 		SeparatorMenuItem separatorOne = new SeparatorMenuItem();
 		SeparatorMenuItem separatorTwo = new SeparatorMenuItem();
 
 		return new ContextMenu(editTags, showExifData, separatorOne, renameFile, deleteItems, separatorTwo,
-				showInExplorer);
+				openInPlugin, showInExplorer);
 
 	}
 
@@ -294,7 +355,8 @@ public class MainTableViewInitialiser {
 	private FilteredList<Photo> getFilteredPhotosList() {
 		FilteredList<Photo> filteredPhotosList = new FilteredList<>(mainWindowController.getPhotoList());
 		/*
-		 * filter the file list according to the filter selected in the filterlist
+		 * filter the file list according to the filter selected in the
+		 * filterlist
 		 */
 		filteredPhotosList.predicateProperty().bind(Bindings.createObjectBinding(() -> photo -> {
 			// DONE add checkbox to select inclusive/exclusive filter
@@ -304,18 +366,19 @@ public class MainTableViewInitialiser {
 			List<String> filterList = mainWindowController.getFilterListView().getSelectionModel().getSelectedItems();
 			String noFilterString = mainWindowController.getFilterListView().getSelectionModel().getSelectedItem();
 
-			// FIXME when playing around with selecting two or more filter, sometimes a npe
+			// FIXME when playing around with selecting two or more filter,
+			// sometimes a npe
 			// gets throwm, and a photo added to the photolist in maintable
 			if (!exclude) {
 				/*
-				 * filter photos inclusively (display photo location if at least one tag matches
-				 * any of the selected filters
+				 * filter photos inclusively (display photo location if at least
+				 * one tag matches any of the selected filters
 				 */
 				contains = !Collections.disjoint(photo.getTags(), filterList) || noFilterString.equals("Kein Filter");
 			} else {
 				/*
-				 * filter photos exclusively ( display photo location only if its tags matches
-				 * every selected filter
+				 * filter photos exclusively ( display photo location only if
+				 * its tags matches every selected filter
 				 */
 				// DONE implement exclusive filter
 				contains = photo.getTags().containsAll(filterList) || noFilterString.equals("Kein Filter");

@@ -7,9 +7,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import mainWindow.controller.MainWindowController;
@@ -86,6 +86,17 @@ public class FullViewWindow {
 		newStage = new Stage();
 		newStage.setWidth(mainTableView.getScene().getWindow().getWidth());
 		newStage.setHeight(mainTableView.getScene().getWindow().getHeight());
+		
+		scene.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ESCAPE){
+				newStage.close();
+			}else if(event.getCode() == KeyCode.RIGHT){
+				nextImage();
+			}else if(event.getCode() == KeyCode.LEFT){
+				previousImage();
+			}
+			
+		});
 
 		HBox.setMargin(nextImageBtn, new Insets(0, 0, 15, 0));
 		HBox.setMargin(prevImageBtn, new Insets(0, 0, 15, 0));

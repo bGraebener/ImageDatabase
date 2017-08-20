@@ -1,17 +1,14 @@
 package mainWindow.controller;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.ResourceBundle;
 
 import javafx.beans.binding.Bindings;
@@ -27,12 +24,14 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -42,6 +41,7 @@ import utilWindows.wizard.controller.WizardController;
 import utils.BasicOperations;
 import utils.FilterListViewInitialiser;
 import utils.MainTableViewInitialiser;
+import utils.PropertiesInitialiser;
 
 //TODO Menu implementieren
 //TODO Einstellungen, Settings und Preferences
@@ -50,6 +50,7 @@ import utils.MainTableViewInitialiser;
 //TODO add directory change listener
 //TODO mehr tablecolumns, (dateiname, ordner, schlagwoerter, hinzugefuegt)
 //TODO complete settings window 
+//TODO externe plugins aufrufen
 
 //DONE implement exif-data display
 //DONE Dateinamen im Full Viwe WIndow aendern
@@ -98,20 +99,22 @@ public class MainWindowController implements Initializable {
 	private CheckBox filterExclusiv;
 	@FXML
 	public Separator bottomSeparator;
-	@FXML 
+	@FXML
 	private TextField searchFileTextField;
-	@FXML 
+	@FXML
 	private Button searchFileBtn;
 	@FXML
 	private ComboBox<String> prevSearchComboBox;
+	@FXML
+	private MenuItem importPhotosMenuItem;
 
 	private Stage stage;
 	private ObservableList<String> filterList;
 	private ObservableList<Photo> photoList;
 	private String mainFolder;
 	private ObservableList<String> prevSearchList;
-	
-	private Properties properties;
+
+	// private Properties properties;
 
 	/**
 	 * Method starts by loading the the config file. It then retrieves the saved
@@ -121,20 +124,11 @@ public class MainWindowController implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 
-		properties = new Properties();
-		try {
-			properties.load(new FileInputStream("res/config.properties"));
+		mainFolder = PropertiesInitialiser.getMainFolder();
 
-			mainFolder = properties.getProperty("mainFolder");
+		if (mainFolder == null || mainFolder.isEmpty() || !Files.exists(Paths.get(mainFolder))) {
+			mainFolder = BasicOperations.getMainFolder();
 
-			if (mainFolder == null || mainFolder.isEmpty()) {
-				mainFolder = BasicOperations.getMainFolder();
-
-				properties.load(new FileInputStream("res/config.properties"));
-
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 
 		// populate Photo List
@@ -150,52 +144,58 @@ public class MainWindowController implements Initializable {
 
 		numOfFilesLabel.textProperty()
 				.bind((Bindings.concat("Anzahl Dateien: ", Bindings.size(mtvi.getSortedList()).asString())));
-		mainFolderLabel.textProperty().bind(Bindings.format("Speicherort: %s", properties.getProperty("mainFolder")));
+		mainFolderLabel.textProperty().bind(Bindings.format("Speicherort: %s", PropertiesInitialiser.getMainFolder()));
 
 		// bottomSeparator.prefWidthProperty().bind(bottomSeparator.getParent().getScene().widthProperty());
 
 		mainTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-		
-		//search for files
+
+		// search for files
 		prevSearchList = FXCollections.observableArrayList();
-		
+
 		searchFileTextField.setOnKeyReleased(event -> {
-			if(event.getCode() == KeyCode.ENTER){
+			if (event.getCode() == KeyCode.ENTER) {
 				searchPhoto(searchFileTextField.getText());
 				prevSearchList.add(searchFileTextField.getText());
 				prevSearchComboBox.getSelectionModel().select(searchFileTextField.getText());
 			}
 		});
-				
+
 		searchFileBtn.setOnAction(event -> {
 			searchPhoto(searchFileTextField.getText());
 			prevSearchList.add(searchFileTextField.getText());
 			prevSearchComboBox.getSelectionModel().select(searchFileTextField.getText());
 		});
-		
+
 		prevSearchComboBox.setItems(prevSearchList);
 		prevSearchComboBox.setOnAction(event -> {
 			searchPhoto(prevSearchComboBox.getSelectionModel().getSelectedItem());
 		});
-		
+
+		importPhotosMenuItem
+				.setAccelerator(KeyCombination.keyCombination(PropertiesInitialiser.getImportShortCutModifier() + "+"
+						+ PropertiesInitialiser.getImportShortCutKeyCode()));
+
 	}
 
-
 	private void searchPhoto(String userSearch) {
-		
-		if(userSearch != null && !userSearch.isEmpty()){
+
+		if (userSearch != null && !userSearch.isEmpty()) {
 			mainTableView.getSelectionModel().clearSelection();
-			photoList.stream().filter(photo -> photo.getPath().getFileName().toString().toLowerCase().contains(userSearch.toLowerCase())).forEach(photo -> {
-				mainTableView.getSelectionModel().select(photo);
-				mainTableView.scrollTo(mainTableView.getSelectionModel().getSelectedItem());
-				mainTableView.requestFocus();
-			});;
+			photoList.stream().filter(
+					photo -> photo.getPath().getFileName().toString().toLowerCase().contains(userSearch.toLowerCase()))
+					.forEach(photo -> {
+						mainTableView.getSelectionModel().select(photo);
+						mainTableView.scrollTo(mainTableView.getSelectionModel().getSelectedItem());
+						mainTableView.requestFocus();
+					});
+			;
 		}
 	}
 
 	/**
-	 * EventHandler for the moveItemUpBtn. Moves and selects the selected item in
-	 * the filterlist up if it's not top of the list already.
+	 * EventHandler for the moveItemUpBtn. Moves and selects the selected item
+	 * in the filterlist up if it's not top of the list already.
 	 */
 	@FXML
 	private void moveItemUp() {
@@ -209,8 +209,8 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
-	 * EventHandler for the moveItemDownBtn. Moves and selects the selected item in
-	 * the filterlist down if it's not at the bottom of the list already.
+	 * EventHandler for the moveItemDownBtn. Moves and selects the selected item
+	 * in the filterlist down if it's not at the bottom of the list already.
 	 */
 	@FXML
 	private void moveItemDown() {
@@ -223,8 +223,8 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
-	 * Gathers all photos from the predefined source location and collects it in an
-	 * ObservableList to be displayed in the main TableView.
+	 * Gathers all photos from the predefined source location and collects it in
+	 * an ObservableList to be displayed in the main TableView.
 	 * 
 	 * @return the ObservableList of Photos
 	 */
@@ -241,7 +241,8 @@ public class MainWindowController implements Initializable {
 			List<Photo> removedPhotoList = new ArrayList<>(photoListFromFile);
 			// remove deleted files
 			// DONE inform about removed files
-			photoListFromFile.removeIf(photo -> !Files.exists(Paths.get(mainFolder).resolve(photo.getPath().getFileName())));
+			photoListFromFile
+					.removeIf(photo -> !Files.exists(Paths.get(mainFolder).resolve(photo.getPath().getFileName())));
 
 			removedPhotoList.removeAll(photoListFromFile);
 
@@ -257,23 +258,27 @@ public class MainWindowController implements Initializable {
 			Path mainFolder = Paths.get(this.mainFolder);
 			try {
 				Files.walk(mainFolder).forEach(file -> {
-					
+
 					String fileName = file.getFileName().toString();
-					
-					if (!Files.isDirectory(file) && (fileName.endsWith(".jpg") || fileName.endsWith(".gif") ||fileName.endsWith(".png"))) {
+
+					if (!Files.isDirectory(file)
+							&& (fileName.endsWith(".jpg") || fileName.endsWith(".gif") || fileName.endsWith(".png"))) {
 						Photo newPhoto = new Photo(file);
 
 						// TODO show picture in question
 						// ask for tags if photos aren't in the database yet
 						if (!photoListFromFile.contains(newPhoto)) {
 
-//							BasicOperations.showInformationAlert("Neue Datei in Datenbank Ordner gefunden",
-//									"Neues Photo in Datenbank Ordner gefunden!"
-//											+ "\nSie können gleich neue Schlagwörter hinzufügen.",
-//									newPhoto.getPath().getFileName().toString());
-//
-//							List<String> newTags = BasicOperations.getNewTags();
-//							newPhoto.getTags().addAll(newTags);
+							// BasicOperations.showInformationAlert("Neue Datei
+							// in Datenbank Ordner gefunden",
+							// "Neues Photo in Datenbank Ordner gefunden!"
+							// + "\nSie können gleich neue Schlagwörter
+							// hinzufügen.",
+							// newPhoto.getPath().getFileName().toString());
+							//
+							// List<String> newTags =
+							// BasicOperations.getNewTags();
+							// newPhoto.getTags().addAll(newTags);
 
 							photoListFromFile.add(newPhoto);
 						}
@@ -298,10 +303,10 @@ public class MainWindowController implements Initializable {
 	// XXX Allow importing same photos multiple times after confirmation?
 	// (solution: forced rename)
 	/**
-	 * EventHandler for the Import Photos Button. Opens the wizard to import photos.
-	 * It retrieves the selected photos and the tags from the Wizard controller. It
-	 * filters the tag- and imported photo list for duplicates and adds the rest to
-	 * the main photolist and to the filter list.
+	 * EventHandler for the Import Photos Button. Opens the wizard to import
+	 * photos. It retrieves the selected photos and the tags from the Wizard
+	 * controller. It filters the tag- and imported photo list for duplicates
+	 * and adds the rest to the main photolist and to the filter list.
 	 */
 	@FXML
 	private void importPhotos() {
@@ -338,29 +343,31 @@ public class MainWindowController implements Initializable {
 
 		filterListView.getSelectionModel().clearAndSelect(0);
 	}
-	
+
 	@FXML
 	private void openSettingsWindow() {
 		SettingsWindow settings = new SettingsWindow();
 		settings.showSettings();
 	}
-	
+
 	@FXML
 	private void close() {
 		List<Photo> serialiseList = new ArrayList<>(getPhotoList());
-		
-		try (ObjectOutputStream outStream = new ObjectOutputStream(new FileOutputStream("res/photolist.ser"))){
-			
-			outStream.writeObject(serialiseList);
-			outStream.flush();
-			
-		}catch (IOException e){
-			
+
+		if (BasicOperations.closeApplication(serialiseList)) {
+			// try (ObjectOutputStream outStream = new ObjectOutputStream(new
+			// FileOutputStream("res/photolist.ser"))) {
+			//
+			// outStream.writeObject(serialiseList);
+			// outStream.flush();
+			//
+			// } catch (IOException e) {
+			//
+			// }
+
+			stage.close();
 		}
-		
-		stage.close();
 	}
-	
 
 	public TableView<Photo> getMainTableView() {
 		return mainTableView;
