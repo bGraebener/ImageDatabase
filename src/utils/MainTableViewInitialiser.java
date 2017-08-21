@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
@@ -51,7 +50,7 @@ public class MainTableViewInitialiser {
 	private MainWindowController mainWindowController;
 	private DataFormat customDataFormat;
 	private Tooltip tooltip;
-	private SortedList<Photo> sortedList;
+//	private SortedList<Photo> sortedList;
 
 	// private FullViewWindow = new FullViewWindow(new
 	// ormat("7295847979775465822L"), new Tooltip());
@@ -82,14 +81,15 @@ public class MainTableViewInitialiser {
 	 */
 	public void initMainTableView(ObservableList<Photo> photoList) {
 
-		FilteredList<Photo> filteredPhotosList = getFilteredPhotosList();
+//		FilteredList<Photo> filteredPhotosList = getFilteredPhotosList();
+//		sortedList = new SortedList<>(filteredPhotosList);
+//		sortedList.comparatorProperty().bind(mainTableView.comparatorProperty());
+		
 		tooltip = new Tooltip();
 		tooltip.setStyle("-fx-font-size: 10pt;");
 
-		sortedList = new SortedList<>(filteredPhotosList);
-		sortedList.comparatorProperty().bind(mainTableView.comparatorProperty());
 
-		mainTableView.setItems(sortedList);
+//		mainTableView.setItems(sortedList);
 		mainTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		mainTableView.setContextMenu(createMainTableContextMenu());
 		mainTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -136,7 +136,7 @@ public class MainTableViewInitialiser {
 			boolean success = false;
 			if (db.hasFiles()) {
 				// DONE copy actual files and allow for tags to be set
-				// TODO show pictures in question
+				// XXX show pictures in question
 				// ImportPreviewDialog ipd = new
 				// ImportPreviewDialog(db.getFiles());
 				// List<String> newTags = ipd.showImportPhotosDialog();
@@ -201,6 +201,8 @@ public class MainTableViewInitialiser {
 				.setCellValueFactory(cellData -> cellData.getValue().getTagsAsObservableProperty());
 
 		mainWindowController.getAddedColumn().setCellValueFactory(cellData -> cellData.getValue().getAddedProperty());
+		
+		
 	}
 
 	// DONE add show in system explorer
@@ -354,7 +356,7 @@ public class MainTableViewInitialiser {
 	/**
 	 * @return
 	 */
-	private FilteredList<Photo> getFilteredPhotosList() {
+	public FilteredList<Photo> getFilteredPhotosList() {
 		FilteredList<Photo> filteredPhotosList = new FilteredList<>(mainWindowController.getPhotoList());
 		/*
 		 * filter the file list according to the filter selected in the
@@ -364,7 +366,7 @@ public class MainTableViewInitialiser {
 			// DONE add checkbox to select inclusive/exclusive filter
 
 			boolean contains = false;
-			boolean exclude = mainWindowController.filterExclusiv();
+			boolean exclude = mainWindowController.isFilterExclusive();
 			List<String> filterList = mainWindowController.getFilterListView().getSelectionModel().getSelectedItems();
 			String noFilterString = mainWindowController.getFilterListView().getSelectionModel().getSelectedItem();
 
@@ -394,7 +396,7 @@ public class MainTableViewInitialiser {
 		return filteredPhotosList;
 	}
 
-	public SortedList<Photo> getSortedList() {
-		return sortedList;
-	}
+//	public SortedList<Photo> getSortedList() {
+//		return sortedList;
+//	}
 }

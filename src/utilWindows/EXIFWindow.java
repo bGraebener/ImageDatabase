@@ -99,7 +99,7 @@ public class EXIFWindow {
 
 	private void getMetaData(Photo photo) {
 
-		//TODO add gif and png info
+		//XXX add gif and png info
 		try {
 			metadata = ImageMetadataReader.readMetadata(photo.getPath().toFile());
 

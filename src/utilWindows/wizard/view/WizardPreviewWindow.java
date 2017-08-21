@@ -204,7 +204,7 @@ public class WizardPreviewWindow {
 		});
 
 //		imageView.setFitHeight(150);
-//		imageView.setFitWidth(150);
+		imageView.setFitWidth(150);
 
 		return imageView;
 	}

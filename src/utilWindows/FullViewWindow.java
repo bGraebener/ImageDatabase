@@ -106,14 +106,14 @@ public class FullViewWindow {
 
 	private void previousImage() {
 		--startIndex;
-		startIndex = startIndex < 0 ? (mainWindowController.getPhotoList().size() - 1) : startIndex;
+		startIndex = startIndex < 0 ? (mainWindowController.getFilteredPhotosList().size() - 1) : startIndex;
 		mainTableView.getSelectionModel().clearAndSelect(startIndex);
 		imageView.setImage(mainTableView.getSelectionModel().getSelectedItem().getImage());
 		newStage.setTitle(mainTableView.getSelectionModel().getSelectedItem().getPath().getFileName().toString());
 	}
 
 	private void nextImage() {
-		startIndex = ++startIndex % (mainWindowController.getPhotoList().size());
+		startIndex = ++startIndex % (mainWindowController.getFilteredPhotosList().size());
 		mainTableView.getSelectionModel().clearAndSelect(startIndex);
 		imageView.setImage(mainTableView.getSelectionModel().getSelectedItem().getImage());
 		newStage.setTitle(mainTableView.getSelectionModel().getSelectedItem().getPath().getFileName().toString());

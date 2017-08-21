@@ -14,6 +14,8 @@ import java.util.ResourceBundle;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -43,15 +45,14 @@ import utils.FilterListViewInitialiser;
 import utils.MainTableViewInitialiser;
 import utils.PropertiesInitialiser;
 
-//TODO Menu implementieren
 //TODO Einstellungen, Settings und Preferences
 //TODO Kommentieren
 //TODO Ordenerstruktur erhalten? Ordnername als Schlagwort
-//TODO add directory change listener
-//TODO mehr tablecolumns, (dateiname, ordner, schlagwoerter, hinzugefuegt)
 //TODO complete settings window 
 //TODO externe plugins aufrufen
+//TODO localizsation 
 
+//DONE mehr tablecolumns, (dateiname, ordner, schlagwoerter, hinzugefuegt)
 //DONE implement exif-data display
 //DONE Dateinamen im Full Viwe WIndow aendern
 //DONE Suchfeld für (Schlagwörter) und Dateinamen 
@@ -69,6 +70,7 @@ import utils.PropertiesInitialiser;
 //DONE anzahl von Bildern anzeigen
 //DONE filterliste automatisch updaten
 
+//XXX add directory change listener (need to restart!)
 //XXX ändere main tableview zu listview?
 //XXX mehr tooltips (bei hover over thumbnail)
 //XXX add video support
@@ -113,6 +115,7 @@ public class MainWindowController implements Initializable {
 	private ObservableList<Photo> photoList;
 	private String mainFolder;
 	private ObservableList<String> prevSearchList;
+	private FilteredList<Photo> filteredPhotosList;
 
 	// private Properties properties;
 
@@ -141,9 +144,16 @@ public class MainWindowController implements Initializable {
 		// initialise the TableView that holds the Photos
 		MainTableViewInitialiser mtvi = new MainTableViewInitialiser(this);
 		mtvi.initMainTableView(photoList);
+		
+		filteredPhotosList = mtvi.getFilteredPhotosList();
+		SortedList<Photo> sortedList = new SortedList<>(filteredPhotosList);
+		sortedList.comparatorProperty().bind(mainTableView.comparatorProperty());
+		mainTableView.setItems(sortedList);
+		
 
 		numOfFilesLabel.textProperty()
-				.bind((Bindings.concat("Anzahl Dateien: ", Bindings.size(mtvi.getSortedList()).asString())));
+//				.bind((Bindings.concat("Anzahl Dateien: ", Bindings.size(mtvi.getSortedList()).asString())));
+		.bind((Bindings.concat("Anzahl Dateien: ", Bindings.size(sortedList).asString())));
 		mainFolderLabel.textProperty().bind(Bindings.format("Speicherort: %s", PropertiesInitialiser.getMainFolder()));
 
 		// bottomSeparator.prefWidthProperty().bind(bottomSeparator.getParent().getScene().widthProperty());
@@ -331,6 +341,8 @@ public class MainWindowController implements Initializable {
 		}
 
 		filterListView.getSelectionModel().clearAndSelect(0);
+		mainTableView.getSelectionModel().clearAndSelect(0);
+		mainTableView.requestFocus();
 	}
 
 	@FXML
@@ -385,7 +397,11 @@ public class MainWindowController implements Initializable {
 		return pictureInfoLabel;
 	}
 
-	public boolean filterExclusiv() {
+	public FilteredList<Photo> getFilteredPhotosList() {
+		return filteredPhotosList;
+	}
+
+	public boolean isFilterExclusive() {
 		return filterExclusiv.isSelected();
 	}
 

@@ -8,19 +8,26 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.Photo;
 import utilWindows.wizard.view.LocationChooserWindow;
 import utilWindows.wizard.view.WizardPreviewWindow;
 import utilWindows.wizard.view.WizardTagWindow;
 import utils.BasicOperations;
-
 
 //FIXME Refactor!!!!!
 
@@ -52,8 +59,9 @@ public class WizardController implements Initializable {
 	private LocationChooserWindow locationChooser;
 	private WizardPreviewWindow previewWindow;
 	private WizardTagWindow tagsWindow;
-	
 
+	private Stage stage;
+	private ProgressBar pb;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -84,6 +92,7 @@ public class WizardController implements Initializable {
 			} else {
 				switchToPreviewWindow();
 			}
+			backBtn.setDisable(false);
 			break;
 
 		case "secondPane":
@@ -116,7 +125,13 @@ public class WizardController implements Initializable {
 		switch (mainContainer.getChildren().get(0).getId()) {
 
 		case "thirdPane":
-			switchToPreviewWindow();
+			if (locationChooser.skipPreview()) {
+				locationChooser = new LocationChooserWindow(mainContainer);
+				mainContainer.getChildren().set(0, locationChooser.getImagesLocationPane());
+				backBtn.setDisable(true);
+			} else {
+				switchToPreviewWindow();
+			}
 			break;
 
 		case "secondPane":
@@ -133,8 +148,8 @@ public class WizardController implements Initializable {
 	private void switchToPreviewWindow() {
 		listOfFiles = locationChooser.getListOfPaths();
 
-//		Alert alert;
-		
+		// Alert alert;
+
 		if (listOfFiles == null || listOfFiles.isEmpty()) {
 			Alert alert = BasicOperations.showErrorAlert("Keine Dateien gefunden",
 					"In dem gewählten Ordner befinden sich keine Dateien der unterstützten Formate.",
@@ -142,21 +157,12 @@ public class WizardController implements Initializable {
 			alert.showAndWait();
 			return;
 		}
-		
-//		pb = new ProgressBar();
-////		alert = BasicOperations.showInformationAlert("Importiere Bilder", "Fortschritt", null);
-//		Alert alert = new Alert(AlertType.NONE);
-//		alert.getDialogPane().setExpandableContent(pb);
-//		alert.getDialogPane().setExpanded(true);
-//		alert.show();
 
-		
 		previewWindow = new WizardPreviewWindow(mainContainer, listOfFiles);
 
 		mainContainer.getChildren().set(0, previewWindow.getPreviewWindow());
 		currentStage.setTitle("Vorschau");
 
-		backBtn.setDisable(false);
 	}
 
 	/**
@@ -164,7 +170,7 @@ public class WizardController implements Initializable {
 	 */
 	private void switchToTagsWindow() {
 		if (locationChooser.skipPreview()) {
-			
+
 			if (locationChooser.getListOfPaths() == null || locationChooser.getListOfPaths().isEmpty()) {
 				Alert alert = BasicOperations.showErrorAlert("Keine Dateien gefunden",
 						"In dem gewählten Ordner befinden sich keine Dateien der unterstützten Formate.",
@@ -172,7 +178,7 @@ public class WizardController implements Initializable {
 				alert.showAndWait();
 				return;
 			}
-			
+
 			importedList = locationChooser.getListOfPaths().stream().map(x -> new Photo(x))
 					.collect(Collectors.toList());
 		} else {
@@ -213,18 +219,45 @@ public class WizardController implements Initializable {
 	 */
 	private void copyFiles() {
 
-		copyList = new ArrayList<>();
-		// XXX change to loop to skip if no rename
-		importedList.forEach(original -> {
+		// FIXME progressbar Window
 
-			Optional<Photo> newPhoto = BasicOperations.copyFile(original);
+		showProgressBarWindow();
+		stage.show();
+
+		copyList = new ArrayList<>();
+
+		// XXX change to loop to skip if no rename
+
+		for (int i = 0; i < importedList.size(); i++) {
+			double secondCounter = i;
+			Optional<Photo> newPhoto = BasicOperations.copyFile(importedList.get((int) secondCounter));
 
 			if (newPhoto.isPresent()) {
 				copyList.add(newPhoto.get());
 				tagsList.addAll(newPhoto.get().getTags());
 			}
-
+		}
+		Platform.runLater(() -> {
+			stage.close();
 		});
+
+	}
+
+	private void showProgressBarWindow() {
+
+		VBox progressBox = new VBox();
+		Label importProgressLabel = new Label("Kopiere Fotos...");
+		pb = new ProgressBar();
+		pb.setPrefWidth(300);
+
+		VBox.setMargin(importProgressLabel, new Insets(15));
+
+		progressBox.getChildren().addAll(importProgressLabel, pb);
+		Scene scene = new Scene(progressBox);
+		stage = new Stage();
+		stage.setScene(scene);
+		stage.setTitle("Kopiere Fotos...");
+
 	}
 
 	private void clearLists() {
@@ -266,5 +299,4 @@ public class WizardController implements Initializable {
 		this.currentStage.setOnCloseRequest(ev -> clearLists());
 	}
 
-	
 }

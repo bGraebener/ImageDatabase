@@ -33,6 +33,7 @@ public class WizardTagWindow {
 		this.mainContainer = mainContainer;
 		this.filterList = filterList;
 		filterList.remove("Kein Filter");
+		filterList.remove("Ohne Schlagwort");
 		
 		defaultPadding = new Insets(35);
 	}

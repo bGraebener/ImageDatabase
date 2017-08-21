@@ -28,7 +28,7 @@ public class Photo implements Serializable {
 
 	public Photo(Path location) {
 
-		//FIXME took out toRealPath, might fuck up other things, always check with Files.exists()
+		//XXX took out toRealPath, might fuck up other things, always check with Files.exists()
 		this.location = location.toString();
 
 		tagsList = new TreeSet<>();
