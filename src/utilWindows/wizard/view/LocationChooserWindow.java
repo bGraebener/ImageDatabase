@@ -10,13 +10,15 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.ListView;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -35,15 +37,13 @@ public class LocationChooserWindow {
 
 	private Insets defaultPadding = new Insets(15);
 	private Pane mainContainer;
-	private List<File> listFromFilesDialog;
 	private CheckBox skipPreviewCheckBox;
-	private ToggleGroup tGroup;
-	private RadioButton filesRadioButton, dirRadioButton;
-	private Path dirAsPath;
+
+	private ObservableList<Path> listOfPaths;
 
 	public LocationChooserWindow(Pane mainContainer) {
 		this.mainContainer = mainContainer;
-		
+
 	}
 
 	public Pane getImagesLocationPane() {
@@ -53,50 +53,44 @@ public class LocationChooserWindow {
 						+ "oder ganze Ordner auswählen die sie importieren möchten!");
 		welcome.setPadding(defaultPadding);
 
-		tGroup = new ToggleGroup();
+		listOfPaths = FXCollections.observableArrayList();
 
-		HBox firstHBox = createFilesHBox();
+		HBox mainBox = new HBox(15);
+		VBox buttonBox = new VBox(15);
 
-		HBox secondHBox = createDirectoryHBox();
+		ListView<Path> filesListView = new ListView<>(listOfPaths);
+		filesListView.setOnDragOver(event -> {
 
-		// ********************************************************************************
-		// skip preview button
-		skipPreviewCheckBox = new CheckBox(
-				"Vorschau überspringen (importiert alle im Ordner befindlichen Dateien und Unterordner!)");
-		skipPreviewCheckBox.setPadding(defaultPadding);
+			Dragboard db = event.getDragboard();
+			boolean allowed = false;
 
-		// ********************************************************************************
-		// root pane
-		VBox root = new VBox(15, welcome, firstHBox, secondHBox, skipPreviewCheckBox);
-		root.setId("firstPane");
-		root.prefHeightProperty().bind(mainContainer.heightProperty().subtract(40));
+			allowed = db.getFiles().stream()
+					.allMatch(file -> file.exists()
+							&& (file.getAbsolutePath().endsWith(".jpg") || file.getAbsolutePath().endsWith(".png")
+									|| file.getAbsolutePath().endsWith(".gif") || file.isDirectory()));
+			
+			if(allowed){
+			event.acceptTransferModes(TransferMode.COPY);
+			}
 
-		return root;
-	}
+		});
+		
+		filesListView.setOnDragDropped(event -> {
+			Dragboard db = event.getDragboard();			
+			if(db.hasFiles()){				
+				db.getFiles().forEach(file -> {
+					listOfPaths.add(file.toPath());
+				});				
+			}			
+		});
+		
+		filesListView.setPrefWidth(560);
 
-	/**
-	 * Creates a HBox Container that contains elements used to get the location
-	 * for a folder of images.
-	 * 
-	 * @return the created HBox
-	 */
-	private HBox createDirectoryHBox() {
-		dirRadioButton = new RadioButton();
-
-		TextField dirTextField = new TextField();
-		dirTextField.setPromptText("Wähle Ordner aus...");
-		dirTextField.setPrefWidth(450);
-		dirTextField.setDisable(true);
+		HBox.setMargin(filesListView, new Insets(0, 0, 0, 15));
 
 		Button browseDirBtn = new Button("Ordner auswählen");
-		browseDirBtn.setDisable(true);
-
 		browseDirBtn.setOnAction((event) -> {
 			DirectoryChooser fileChooser = new DirectoryChooser();
-			// fileChooser.setInitialDirectory(
-			// // FIXME change before deploy
-			// new File("C:\\D-Drive\\Fotos\\2015.07.18 (Hochzeit von Basti und
-			// Orla) Germany\\sJPG\\4-Star\\"));
 
 			File directory = fileChooser.showDialog(null);
 
@@ -105,41 +99,9 @@ public class LocationChooserWindow {
 				return;
 			}
 
-			dirAsPath = directory.toPath();
-			// System.out.println(dirAsPath);
-			dirTextField.setText(dirAsPath.toAbsolutePath().toString());
-			
+			listOfPaths.add(directory.toPath());
 
 		});
-
-		dirRadioButton.setToggleGroup(tGroup);
-		dirRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			browseDirBtn.setDisable(!newValue);
-			dirTextField.setDisable(!newValue);
-			dirTextField.setText("");
-		});
-
-		HBox secondHBox = new HBox(10, dirRadioButton, dirTextField, browseDirBtn);
-		secondHBox.setPadding(defaultPadding);
-		return secondHBox;
-	}
-
-	/**
-	 * Creates a HBox Container that contains elements used to get the location
-	 * for individual file or files.
-	 * 
-	 * @return the created HBox
-	 */
-	private HBox createFilesHBox() {
-		// ********************************************************************************
-		// files chooser hbox
-
-		filesRadioButton = new RadioButton();
-		filesRadioButton.setSelected(true);
-
-		TextField filesTextField = new TextField();
-		filesTextField.setPromptText("Wähle Dateien aus...");
-		filesTextField.setPrefWidth(450);
 
 		Button browseFilesBtn = new Button("Dateien auswählen");
 
@@ -150,27 +112,36 @@ public class LocationChooserWindow {
 					"*.gif");
 			fileChooser.getExtensionFilters().add(filter);
 
-			listFromFilesDialog = fileChooser.showOpenMultipleDialog(null);
+			List<File> listFromFilesDialog = fileChooser.showOpenMultipleDialog(null);
 
 			// nothing chosen
 			if (listFromFilesDialog == null || listFromFilesDialog.isEmpty()) {
 				return;
 			}
 
-			filesTextField.setText(listFromFilesDialog.toString().replaceAll("\\[|\\]", ""));
+			listFromFilesDialog.stream().map(file -> file.toPath()).filter(path -> Files.exists(path))
+					.forEach(listOfPaths::add);
+
 		});
 
-		filesRadioButton.setToggleGroup(tGroup);
-		filesRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			browseFilesBtn.setDisable(!newValue);
-			filesTextField.setDisable(!newValue);
-			filesTextField.setText("");
-		});
+		buttonBox.getChildren().addAll(browseFilesBtn, browseDirBtn);
+		mainBox.getChildren().addAll(filesListView, buttonBox);
 
-		HBox firstHBox = new HBox(10, filesRadioButton, filesTextField, browseFilesBtn);
-		firstHBox.setPadding(defaultPadding);
+		// ********************************************************************************
+		// skip preview button
+		skipPreviewCheckBox = new CheckBox(
+				"Vorschau überspringen (importiert alle im Ordner befindlichen Dateien und Unterordner!)");
+		skipPreviewCheckBox.setPadding(defaultPadding);
 
-		return firstHBox;
+		// ********************************************************************************
+		// root pane
+		// VBox root = new VBox(15, welcome, firstHBox, secondHBox,
+		// skipPreviewCheckBox);
+		VBox root = new VBox(15, welcome, mainBox, skipPreviewCheckBox);
+		root.setId("firstPane");
+		root.prefHeightProperty().bind(mainContainer.heightProperty().subtract(40));
+
+		return root;
 	}
 
 	/**
@@ -180,48 +151,47 @@ public class LocationChooserWindow {
 	 * @param dirAsPath
 	 *            the Path to start
 	 */
-	private void addFilesToList(Path dirAsPath, List<File> listOfFiles) {
+	private void addFilesToList(Path dirAsPath, List<Path> listOfFiles) {
 		try {
 			Files.walkFileTree(dirAsPath, new SimpleFileVisitor<Path>() {
-	
+
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attr) {
-	
-					File imageFile = file.toFile();
-	
+
 					// DONE add all supported files
-					if (imageFile.getAbsolutePath().endsWith(".jpg") || imageFile.getAbsolutePath().endsWith(".png")
-							|| imageFile.getAbsolutePath().endsWith(".gif")) {
-						listOfFiles.add(imageFile);
+					if (file.toAbsolutePath().toString().endsWith(".jpg")
+							|| file.toAbsolutePath().toString().endsWith(".png")
+							|| file.toAbsolutePath().toString().endsWith(".gif")) {
+						listOfFiles.add(file);
 					}
-	
+
 					return FileVisitResult.CONTINUE;
 				}
-	
+
 			});
-	
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	/**
-	 * Getter for the List of files the user whishes to import
-	 * 
-	 * @return
-	 */
-	public List<File> getListOfFiles() {
-		
-		List<File> listOfFiles = new ArrayList<>();
-		
-		if(filesRadioButton.isSelected()){
-			listOfFiles = listFromFilesDialog;
-		}else{
-			if(dirAsPath != null && Files.exists(dirAsPath)){
-			addFilesToList(dirAsPath, listOfFiles);}
-		}
-		
-		return listOfFiles;
+	public List<Path> getListOfPaths() {
+
+		List<Path> tmpList = new ArrayList<>();
+
+		listOfPaths.forEach(path -> {
+
+			if (Files.isDirectory(path)) {
+
+				addFilesToList(path, tmpList);
+
+			} else {
+				tmpList.add(path);
+			}
+
+		});
+
+		return tmpList;
 	}
 
 	/**

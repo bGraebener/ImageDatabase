@@ -265,7 +265,7 @@ public class MainWindowController implements Initializable {
 							&& (fileName.endsWith(".jpg") || fileName.endsWith(".gif") || fileName.endsWith(".png"))) {
 						Photo newPhoto = new Photo(file);
 
-						// TODO show picture in question
+						// XXX show picture in question
 						// ask for tags if photos aren't in the database yet
 						if (!photoListFromFile.contains(newPhoto)) {
 

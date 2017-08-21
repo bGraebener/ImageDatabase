@@ -1,7 +1,7 @@
 package utilWindows.wizard.controller;
 
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,19 +41,19 @@ public class WizardController implements Initializable {
 	@FXML
 	private VBox mainContainer;
 
-	private List<File> listOfFiles;
 	private Stage currentStage;
 
+	private List<Path> listOfFiles;
 	private List<Photo> importedList;
 	private List<String> tagsList;
+	private ArrayList<String> filterList;
+	private ArrayList<Photo> copyList;
 
 	private LocationChooserWindow locationChooser;
 	private WizardPreviewWindow previewWindow;
 	private WizardTagWindow tagsWindow;
-	private ArrayList<String> filterList;
+	
 
-	// private Properties properties;
-	private ArrayList<Photo> copyList;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -131,8 +131,10 @@ public class WizardController implements Initializable {
 	 * Utility mathod to switch from the current window to the PreviewWindow.
 	 */
 	private void switchToPreviewWindow() {
-		listOfFiles = locationChooser.getListOfFiles();
+		listOfFiles = locationChooser.getListOfPaths();
 
+//		Alert alert;
+		
 		if (listOfFiles == null || listOfFiles.isEmpty()) {
 			Alert alert = BasicOperations.showErrorAlert("Keine Dateien gefunden",
 					"In dem gewählten Ordner befinden sich keine Dateien der unterstützten Formate.",
@@ -140,7 +142,15 @@ public class WizardController implements Initializable {
 			alert.showAndWait();
 			return;
 		}
+		
+//		pb = new ProgressBar();
+////		alert = BasicOperations.showInformationAlert("Importiere Bilder", "Fortschritt", null);
+//		Alert alert = new Alert(AlertType.NONE);
+//		alert.getDialogPane().setExpandableContent(pb);
+//		alert.getDialogPane().setExpanded(true);
+//		alert.show();
 
+		
 		previewWindow = new WizardPreviewWindow(mainContainer, listOfFiles);
 
 		mainContainer.getChildren().set(0, previewWindow.getPreviewWindow());
@@ -155,7 +165,7 @@ public class WizardController implements Initializable {
 	private void switchToTagsWindow() {
 		if (locationChooser.skipPreview()) {
 			
-			if (locationChooser.getListOfFiles() == null || locationChooser.getListOfFiles().isEmpty()) {
+			if (locationChooser.getListOfPaths() == null || locationChooser.getListOfPaths().isEmpty()) {
 				Alert alert = BasicOperations.showErrorAlert("Keine Dateien gefunden",
 						"In dem gewählten Ordner befinden sich keine Dateien der unterstützten Formate.",
 						"Bitte wählen sie einen anderen Ordner!");
@@ -163,7 +173,7 @@ public class WizardController implements Initializable {
 				return;
 			}
 			
-			importedList = locationChooser.getListOfFiles().stream().map(x -> new Photo(x.toPath()))
+			importedList = locationChooser.getListOfPaths().stream().map(x -> new Photo(x))
 					.collect(Collectors.toList());
 		} else {
 
@@ -256,4 +266,5 @@ public class WizardController implements Initializable {
 		this.currentStage.setOnCloseRequest(ev -> clearLists());
 	}
 
+	
 }

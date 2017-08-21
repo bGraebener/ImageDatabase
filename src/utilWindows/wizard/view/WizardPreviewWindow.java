@@ -1,13 +1,18 @@
 package utilWindows.wizard.view;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.effect.DropShadow;
@@ -16,6 +21,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import model.Photo;
 
 //DONE Vorschau überspringbar machen
@@ -30,12 +37,17 @@ public class WizardPreviewWindow {
 
 	private List<Photo> importList;
 	private Pane mainContainer;
-	private List<File> listOfFiles;
+	private List<Path> listOfFiles;
 
 	private Insets defaultPadding;
 	private DropShadow ds;
+	private ProgressBar pb;
+	private Stage stage;
+	private Thread importThread;
 
-	public WizardPreviewWindow(Pane mainContainer, List<File> listOfFiles) {
+	private volatile boolean interrupt = false;
+
+	public WizardPreviewWindow(Pane mainContainer, List<Path> listOfFiles) {
 
 		this.listOfFiles = listOfFiles;
 		this.mainContainer = mainContainer;
@@ -61,10 +73,33 @@ public class WizardPreviewWindow {
 		tiles.setHgap(15);
 		tiles.setVgap(15);
 
-		for (Photo photo : listOfPhotos) {
-			ImageView imageView = createImageView(photo);
-			tiles.getChildren().add(imageView);
-		}
+		SimpleIntegerProperty counterObservable = new SimpleIntegerProperty(0);
+
+		showProgressBarWindow(listOfPhotos.size(), counterObservable);
+		stage.show();
+
+		importThread = new Thread(() -> {
+			double counter = 0;
+			List<ImageView> imageViewsList = new ArrayList<>();
+			for (Photo photo : listOfPhotos) {
+				imageViewsList.add(createImageView(photo));
+				double secondCounter = counter++;
+
+				Platform.runLater(() -> {
+					pb.setProgress(secondCounter / listOfPhotos.size());
+					counterObservable.set((int) secondCounter);
+				});
+
+			}
+			Platform.runLater(() -> {
+				if (!interrupt) {
+					tiles.getChildren().addAll(imageViewsList);
+				}
+				stage.close();
+			});
+		});
+
+		importThread.start();
 
 		ScrollPane scrollPane = new ScrollPane();
 		scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -109,12 +144,43 @@ public class WizardPreviewWindow {
 
 	}
 
+	private void showProgressBarWindow(int listSize, SimpleIntegerProperty counterObservable) {
+
+		VBox progressBox = new VBox();
+		Label importProgressLabel = new Label();
+		importProgressLabel.textProperty()
+				.bind(Bindings.concat("Importiere Foto: ", counterObservable, " von " + listSize));
+		pb = new ProgressBar();
+		Button cancelImportBtn = new Button("Abbrechen");
+		cancelImportBtn.setOnAction(event -> {
+			interrupt = true;
+			stage.close();
+		});
+
+		VBox.setMargin(importProgressLabel, new Insets(15));
+		VBox.setMargin(pb, new Insets(15));
+		VBox.setMargin(cancelImportBtn, new Insets(0,15,15,240));
+
+		pb.setPrefWidth(300);
+		progressBox.getChildren().addAll(importProgressLabel, pb, cancelImportBtn);
+		Scene scene = new Scene(progressBox);
+		stage = new Stage();
+		stage.setScene(scene);
+		stage.setTitle("Importiere Fotos...");
+		stage.initModality(Modality.APPLICATION_MODAL);
+		stage.setOnCloseRequest(event -> {
+			interrupt = true;
+		});
+
+	}
+
 	/**
 	 * Utility method that creates an ImageView and adds a Photo to it. A
 	 * ClickHandler adds the Photo to a List of to be imported Photos or removes
 	 * the Photo from the List if its already in the List.
 	 * 
-	 * @param photo The Photo to be added to the ImageView
+	 * @param photo
+	 *            The Photo to be added to the ImageView
 	 * @return the created ImageView
 	 */
 	private ImageView createImageView(Photo photo) {
@@ -137,7 +203,8 @@ public class WizardPreviewWindow {
 			}
 		});
 
-		imageView.setFitHeight(150);
+//		imageView.setFitHeight(150);
+//		imageView.setFitWidth(150);
 
 		return imageView;
 	}
@@ -145,8 +212,8 @@ public class WizardPreviewWindow {
 	private List<Photo> convertFilesToPhotos() {
 		List<Photo> listOfPhotos = new ArrayList<>();
 
-		for (File x : listOfFiles) {
-			listOfPhotos.add(new Photo(x.toPath()));
+		for (Path x : listOfFiles) {
+			listOfPhotos.add(new Photo(x));
 		}
 
 		return listOfPhotos;
