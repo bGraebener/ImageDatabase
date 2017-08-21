@@ -269,17 +269,6 @@ public class MainWindowController implements Initializable {
 						// ask for tags if photos aren't in the database yet
 						if (!photoListFromFile.contains(newPhoto)) {
 
-							// BasicOperations.showInformationAlert("Neue Datei
-							// in Datenbank Ordner gefunden",
-							// "Neues Photo in Datenbank Ordner gefunden!"
-							// + "\nSie können gleich neue Schlagwörter
-							// hinzufügen.",
-							// newPhoto.getPath().getFileName().toString());
-							//
-							// List<String> newTags =
-							// BasicOperations.getNewTags();
-							// newPhoto.getTags().addAll(newTags);
-
 							photoListFromFile.add(newPhoto);
 						}
 					}
@@ -355,15 +344,6 @@ public class MainWindowController implements Initializable {
 		List<Photo> serialiseList = new ArrayList<>(getPhotoList());
 
 		if (BasicOperations.closeApplication(serialiseList)) {
-			// try (ObjectOutputStream outStream = new ObjectOutputStream(new
-			// FileOutputStream("res/photolist.ser"))) {
-			//
-			// outStream.writeObject(serialiseList);
-			// outStream.flush();
-			//
-			// } catch (IOException e) {
-			//
-			// }
 
 			stage.close();
 		}

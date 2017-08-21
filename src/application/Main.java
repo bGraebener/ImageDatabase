@@ -1,7 +1,6 @@
 package application;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -10,7 +9,6 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import mainWindow.controller.MainWindowController;
-import model.Photo;
 import utils.BasicOperations;
 
 public class Main extends Application {
@@ -18,6 +16,7 @@ public class Main extends Application {
 	public void start(Stage primaryStage) {
 		try {
 
+			
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/mainWindow/view/MainWindow.fxml"));
 
 			BorderPane root = loader.load();
@@ -38,8 +37,8 @@ public class Main extends Application {
 
 			primaryStage.setOnCloseRequest((event) -> {
 
-				List<Photo> serialiseList = new ArrayList<>(controller.getPhotoList());
-				if (BasicOperations.closeApplication(serialiseList)) {
+//				List<Photo> serialiseList = new ArrayList<>(controller.getPhotoList());
+				if (BasicOperations.closeApplication(new ArrayList<>(controller.getPhotoList()))) {
 
 				} else {
 					event.consume();

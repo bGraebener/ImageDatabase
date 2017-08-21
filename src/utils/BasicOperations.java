@@ -304,8 +304,6 @@ public class BasicOperations {
 
 		if (end.isPresent() && end.get() == ButtonType.OK) {
 
-			System.out.println("saving database");
-
 			try (ObjectOutputStream outStream = new ObjectOutputStream(new FileOutputStream("res/photolist.ser"))) {
 
 				outStream.writeObject(photoList);

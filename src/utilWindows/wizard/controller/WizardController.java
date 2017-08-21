@@ -226,8 +226,6 @@ public class WizardController implements Initializable {
 			tagsList.clear();
 		}
 
-		System.out.println(tagsList);
-
 		if (copyList != null) {
 			copyList.clear();
 		}

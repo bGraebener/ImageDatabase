@@ -132,6 +132,7 @@ public class FilterListViewInitialiser {
 
 		mainWindowController.getPhotoList().forEach(photo -> tmp.addAll(photo.getTags()));
 		filterList.add("Kein Filter");
+		filterList.add("Ohne Schlagwort");
 		filterList.addAll(tmp);
 
 		return filterList;

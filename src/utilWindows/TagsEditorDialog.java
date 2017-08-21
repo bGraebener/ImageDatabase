@@ -53,6 +53,7 @@ public class TagsEditorDialog {
 
 		this.selectedPhotos = selectedPhotos;
 		filterList.remove("Kein Filter");
+		filterList.remove("Ohne Schlagwort");
 		this.allExistingTags = FXCollections.observableArrayList(filterList);
 
 		showTagsDialog();

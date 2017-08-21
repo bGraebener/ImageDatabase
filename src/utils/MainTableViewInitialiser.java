@@ -236,6 +236,8 @@ public class MainTableViewInitialiser {
 		});
 
 		MenuItem deleteItems = new MenuItem("Markierte Dateien löschen");
+		deleteItems.setAccelerator(KeyCombination.keyCombination(
+				PropertiesInitialiser.getDeletePhotoShortCutModifier() + "+" + PropertiesInitialiser.getDeletePhotoShortCutKeyCode()));
 		deleteItems.setOnAction((x) -> {
 			List<Photo> itemsToDelete = mainTableView.getSelectionModel().getSelectedItems();
 			boolean deleted = BasicOperations.deleteItems(mainTableView.getSelectionModel().getSelectedItems());
@@ -245,8 +247,8 @@ public class MainTableViewInitialiser {
 		});
 
 		MenuItem showExifData = new MenuItem("Photo Informationen anzeigen");
-		showExifData.setAccelerator(KeyCombination.keyCombination(
-				PropertiesInitialiser.getPhotoInfoShortCutModifier() + "+" + PropertiesInitialiser.getPhotoInfoShortCutKeyCode()));
+		showExifData.setAccelerator(KeyCombination.keyCombination(PropertiesInitialiser.getPhotoInfoShortCutModifier()
+				+ "+" + PropertiesInitialiser.getPhotoInfoShortCutKeyCode()));
 		showExifData.setOnAction(x -> {
 			if (mainTableView.getSelectionModel().getSelectedItems().size() > 1) {
 				Alert alert = BasicOperations.showErrorAlert("Multiple Dateien ausgewählt", null,
@@ -261,8 +263,8 @@ public class MainTableViewInitialiser {
 		});
 
 		MenuItem renameFile = new MenuItem("Datei umbenennen");
-		renameFile.setAccelerator(KeyCombination.keyCombination(
-				PropertiesInitialiser.getRenameShortCutModifier() + "+" + PropertiesInitialiser.getRenameShortCutKeyCode()));
+		renameFile.setAccelerator(KeyCombination.keyCombination(PropertiesInitialiser.getRenameShortCutModifier() + "+"
+				+ PropertiesInitialiser.getRenameShortCutKeyCode()));
 		renameFile.setOnAction(x -> {
 			if (mainTableView.getSelectionModel().getSelectedItems().size() > 1) {
 				Alert alert = BasicOperations.showErrorAlert("Multiple Dateien ausgewählt", null,
@@ -374,7 +376,8 @@ public class MainTableViewInitialiser {
 				 * filter photos inclusively (display photo location if at least
 				 * one tag matches any of the selected filters
 				 */
-				contains = !Collections.disjoint(photo.getTags(), filterList) || noFilterString.equals("Kein Filter");
+				contains = !Collections.disjoint(photo.getTags(), filterList) || noFilterString.equals("Kein Filter")
+						|| (noFilterString.equals("Ohne Schlagwort") && photo.getTags().size() == 0);
 			} else {
 				/*
 				 * filter photos exclusively ( display photo location only if

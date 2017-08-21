@@ -30,21 +30,13 @@ import utils.PropertiesInitialiser;
 public class SettingsWindow {
 
 	private Insets defaultPadding;
-	// private Properties properties;
 	private Stage stage;
 	private TextField pluginNameTextField, externalPluginPathTextField;
 	private ComboBox<KeyCode> tagsShortcutComboBoxModifier, tagsShortcutComboBox, importShortcutComboBoxModifier,
-			importShortcutComboBox, renameShortcutComboBoxModifier, renameShortcutComboBox, photoInfoShortcutComboBoxModifier, photoInfoShortcutComboBox;
+			importShortcutComboBox, renameShortcutComboBoxModifier, renameShortcutComboBox,
+			photoInfoShortcutComboBoxModifier, photoInfoShortcutComboBox, deletePhotoShortcutComboBoxModifier, deletePhotoShortcutComboBox;
 
 	public SettingsWindow() {
-
-		// properties = new Properties();
-		//
-		// try {
-		// properties.load(new FileInputStream("res/config.properties"));
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// }
 
 		defaultPadding = new Insets(20);
 
@@ -68,7 +60,7 @@ public class SettingsWindow {
 		ListView<String> subMenuList = new ListView<>();
 		subMenuList.setPrefWidth(140);
 		subMenuList
-				.setItems(FXCollections.observableArrayList("Allgemein", "Aussehen", "Shortcuts", "Externe Programme"));
+				.setItems(FXCollections.observableArrayList("Allgemein", /*"Aussehen",*/ "Shortcuts" /*, "Externe Programme"*/));
 		subMenuList.getSelectionModel().select(0);
 		subMenuList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 
@@ -104,7 +96,8 @@ public class SettingsWindow {
 		Button okBtn = new Button("Ok");
 		okBtn.setOnAction(event -> {
 			applySettings();
-			BasicOperations.showInformationAlert("Einstellungen geändert", null, "Die geänderten Einstellungen werden erst nach einem Neustart gültig!").show();
+			BasicOperations.showInformationAlert("Einstellungen geändert", null,
+					"Die geänderten Einstellungen werden erst nach einem Neustart gültig!").show();
 			stage.close();
 		});
 
@@ -140,9 +133,12 @@ public class SettingsWindow {
 
 		PropertiesInitialiser.setRenameShortCutKeyCode(renameShortcutComboBox.getValue().getName());
 		PropertiesInitialiser.setRenameShortCutModifier(renameShortcutComboBoxModifier.getValue().getName());
-		
+
 		PropertiesInitialiser.setPhotoInfoShortCutKeyCode(photoInfoShortcutComboBox.getValue().getName());
 		PropertiesInitialiser.setPhotoInfoShortCutModifier(photoInfoShortcutComboBoxModifier.getValue().getName());
+		
+		PropertiesInitialiser.setDeletePhotoShortCutKeyCode(deletePhotoShortcutComboBox.getValue().getName());
+		PropertiesInitialiser.setDeletePhotoShortCutModifier(deletePhotoShortcutComboBoxModifier.getValue().getName());
 
 		PropertiesInitialiser.storeConfigValues();
 
@@ -154,19 +150,19 @@ public class SettingsWindow {
 				KeyCode.G, KeyCode.H, KeyCode.I, KeyCode.J, KeyCode.K, KeyCode.L, KeyCode.M, KeyCode.N, KeyCode.O,
 				KeyCode.P, KeyCode.Q, KeyCode.R, KeyCode.S, KeyCode.T, KeyCode.U, KeyCode.V, KeyCode.W, KeyCode.X,
 				KeyCode.Y, KeyCode.Z);
-		
+
 		ObservableList<KeyCode> obKeyCodes = FXCollections.observableArrayList(keyCodes);
 
 		VBox root = new VBox(15);
 
 		Label title = new Label("Shortcuts festlegen");
 		title.setStyle("-fx-font-size: 12pt;");
+		
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		FlowPane tagsShortPane = new FlowPane(10, 10);
 		Label tagsShortcutLabel = new Label("Schlagwörter editieren: ");
-		tagsShortcutComboBoxModifier = new ComboBox<>(
-				FXCollections.observableArrayList(KeyCode.CONTROL, KeyCode.ALT));
+		tagsShortcutComboBoxModifier = new ComboBox<>(FXCollections.observableArrayList(KeyCode.CONTROL, KeyCode.ALT));
 		tagsShortcutComboBoxModifier.getSelectionModel()
 				.select(KeyCode.getKeyCode(PropertiesInitialiser.getEditTagsModifier()));
 
@@ -174,7 +170,7 @@ public class SettingsWindow {
 		tagsShortcutComboBox.getSelectionModel().select(KeyCode.getKeyCode(PropertiesInitialiser.getEditTagsKeyCode()));
 		obKeyCodes.remove(KeyCode.getKeyCode(PropertiesInitialiser.getEditTagsKeyCode()));
 
-		tagsShortPane.getChildren().addAll(tagsShortcutLabel, tagsShortcutComboBoxModifier, tagsShortcutComboBox);
+		tagsShortPane.getChildren().addAll(tagsShortcutComboBoxModifier, tagsShortcutComboBox);
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		FlowPane importShortPane = new FlowPane(10, 10);
@@ -189,7 +185,7 @@ public class SettingsWindow {
 				.select(KeyCode.getKeyCode(PropertiesInitialiser.getImportShortCutKeyCode()));
 		obKeyCodes.remove(KeyCode.getKeyCode(PropertiesInitialiser.getImportShortCutKeyCode()));
 
-		importShortPane.getChildren().addAll(importShortcutLabel, importShortcutComboBoxModifier,
+		importShortPane.getChildren().addAll(importShortcutComboBoxModifier,
 				importShortcutComboBox);
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,12 +200,12 @@ public class SettingsWindow {
 		renameShortcutComboBox.getSelectionModel()
 				.select(KeyCode.getKeyCode(PropertiesInitialiser.getRenameShortCutKeyCode()));
 		obKeyCodes.remove(KeyCode.getKeyCode(PropertiesInitialiser.getRenameShortCutKeyCode()));
-		renameShortPane.getChildren().addAll(renameShortCutLabel, renameShortcutComboBoxModifier,
+		renameShortPane.getChildren().addAll(renameShortcutComboBoxModifier,
 				renameShortcutComboBox);
-		
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		FlowPane photoInfoShortPane = new FlowPane(10, 10);
-		Label photoInfoShortCutLabel = new Label("Photoinformationen anzeigen: ");
+		Label photoInfoShortCutLabel = new Label("Fotoinformationen anzeigen: ");
 		photoInfoShortcutComboBoxModifier = new ComboBox<>(
 				FXCollections.observableArrayList(KeyCode.CONTROL, KeyCode.ALT));
 		photoInfoShortcutComboBoxModifier.getSelectionModel()
@@ -219,17 +215,42 @@ public class SettingsWindow {
 		photoInfoShortcutComboBox.getSelectionModel()
 				.select(KeyCode.getKeyCode(PropertiesInitialiser.getPhotoInfoShortCutKeyCode()));
 		obKeyCodes.remove(KeyCode.getKeyCode(PropertiesInitialiser.getPhotoInfoShortCutKeyCode()));
-		photoInfoShortPane.getChildren().addAll(photoInfoShortCutLabel, photoInfoShortcutComboBoxModifier,
+		photoInfoShortPane.getChildren().addAll(photoInfoShortcutComboBoxModifier,
 				photoInfoShortcutComboBox);
 
-		root.getChildren().addAll(title, tagsShortPane, importShortPane, renameShortPane, photoInfoShortPane);
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		FlowPane deletePhotoShortPane = new FlowPane(10, 10);
+		Label deletePhotoShortCutLabel = new Label("Fotos löschen: ");
+		deletePhotoShortcutComboBoxModifier = new ComboBox<>(
+				FXCollections.observableArrayList(KeyCode.CONTROL, KeyCode.ALT));
+		deletePhotoShortcutComboBoxModifier.getSelectionModel()
+				.select(KeyCode.getKeyCode(PropertiesInitialiser.getDeletePhotoShortCutModifier()));
+
+		deletePhotoShortcutComboBox = new ComboBox<>(FXCollections.observableArrayList(obKeyCodes));
+		deletePhotoShortcutComboBox.getSelectionModel()
+				.select(KeyCode.getKeyCode(PropertiesInitialiser.getDeletePhotoShortCutKeyCode()));
+		obKeyCodes.remove(KeyCode.getKeyCode(PropertiesInitialiser.getDeletePhotoShortCutKeyCode()));
+		deletePhotoShortPane.getChildren().addAll(deletePhotoShortcutComboBoxModifier,
+				deletePhotoShortcutComboBox);
+		
+		
+		VBox labelBox = new VBox(25);
+		labelBox.getChildren().addAll(tagsShortcutLabel, importShortcutLabel, renameShortCutLabel, photoInfoShortCutLabel, deletePhotoShortCutLabel);
+		
+		VBox comboBoxBox = new VBox(16);
+		comboBoxBox.getChildren().addAll(tagsShortPane, importShortPane, renameShortPane, photoInfoShortPane, deletePhotoShortPane);
+		
+		HBox content = new HBox(15);
+		content.getChildren().addAll(labelBox, comboBoxBox);
+
+		root.getChildren().addAll(title, content);
 
 		VBox.setMargin(title, new Insets(0, 0, 0, 15));
-		VBox.setMargin(tagsShortPane, new Insets(0, 0, 0, 15));
-		VBox.setMargin(importShortPane, new Insets(0, 0, 0, 15));
-		VBox.setMargin(renameShortPane, new Insets(0, 0, 0, 15));
-		VBox.setMargin(photoInfoShortPane, new Insets(0, 0, 0, 15));
-		
+		VBox.setMargin(content, new Insets(0, 0, 0, 15));
+//		VBox.setMargin(importShortPane, new Insets(0, 0, 0, 15));
+//		VBox.setMargin(renameShortPane, new Insets(0, 0, 0, 15));
+//		VBox.setMargin(photoInfoShortPane, new Insets(0, 0, 0, 15));
+//		VBox.setMargin(deletePhotoShortPane, new Insets(0, 0, 0, 15));
 
 		return root;
 	}

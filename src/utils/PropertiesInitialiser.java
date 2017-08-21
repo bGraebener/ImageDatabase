@@ -3,11 +3,14 @@ package utils;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 public class PropertiesInitialiser {
 	
-	private static final Properties properties = new Properties();
+	private static Properties userProperties;
+	private static Properties defaultProperties;
 	private static String mainFolder;
 	private static String editTagsModifier;
 	private static String editTagsKeyCode;
@@ -19,6 +22,8 @@ public class PropertiesInitialiser {
 	private static String renameShortCutKeyCode;
 	private static String photoInfoShortCutModifier;
 	private static String photoInfoShortCutKeyCode;
+	private static String deletePhotoShortCutModifier;
+	private static String deletePhotoShortCutKeyCode;
 	
 	static{
 		initProperties();
@@ -26,30 +31,46 @@ public class PropertiesInitialiser {
 	
 	private static void initProperties(){
 		
+		if(!Files.exists(Paths.get("res/userConfig.properties"))){
+			try {
+				Files.createFile(Paths.get("res/userConfig.properties"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		defaultProperties = new Properties();
+		userProperties = new Properties(defaultProperties);
+		
 		try {
-			properties.load(new FileInputStream("res/config.properties"));
+			defaultProperties.load(new FileInputStream("res/config.properties"));
+			userProperties.load(new FileInputStream("res/userConfig.properties"));
 			
-			mainFolder = properties.getProperty("mainFolder");
+			mainFolder = userProperties.getProperty("mainFolder");
 			
-			editTagsModifier = properties.getProperty("editTagsShortcutModifier", null);
+			editTagsModifier = userProperties.getProperty("editTagsShortcutModifier");
 			
-			editTagsKeyCode = properties.getProperty("editTagsShortcut", null);
+			editTagsKeyCode = userProperties.getProperty("editTagsShortcut");
 			
-			externalName = properties.getProperty("imageEditorName", null);
+			externalName = userProperties.getProperty("imageEditorName");
 			
-			externalPath = properties.getProperty("imageEditorPath", null);
+			externalPath = userProperties.getProperty("imageEditorPath");
 			
-			importShortCutKeyCode = properties.getProperty("importShortCutKeyCode", null);
+			importShortCutKeyCode = userProperties.getProperty("importShortCutKeyCode");
 			
-			importShortCutModifier = properties.getProperty("importShortCutModifier", null);
+			importShortCutModifier = userProperties.getProperty("importShortCutModifier");
 			
-			renameShortCutModifier = properties.getProperty("renameShortCutModifier", null);
+			renameShortCutModifier = userProperties.getProperty("renameShortCutModifier");
 			
-			renameShortCutKeyCode = properties.getProperty("renameShortCutKeyCode", null);
+			renameShortCutKeyCode = userProperties.getProperty("renameShortCutKeyCode");
 			
-			photoInfoShortCutModifier = properties.getProperty("photoInfoShortCutModifier", null);
+			photoInfoShortCutModifier = userProperties.getProperty("photoInfoShortCutModifier");
 			
-			photoInfoShortCutKeyCode = properties.getProperty("photoInfoShortCutKeyCode", null);
+			photoInfoShortCutKeyCode = userProperties.getProperty("photoInfoShortCutKeyCode");
+			
+			deletePhotoShortCutKeyCode = userProperties.getProperty("deletePhotoShortCutKeyCode");
+			
+			deletePhotoShortCutModifier = userProperties.getProperty("deletePhotoShortCutModifier");
 			
 			
 		} catch (IOException e) {
@@ -67,16 +88,16 @@ public class PropertiesInitialiser {
 
 
 	public static void setMainFolder(String mainFolder) {
-		properties.setProperty("mainFolder", mainFolder);
+		userProperties.setProperty("mainFolder", mainFolder);
 	}
 
 
 	public static void setEditTagsModifier(String editTagsModifier) {
-		properties.setProperty("editTagsShortcutModifier", editTagsModifier);
+		userProperties.setProperty("editTagsShortcutModifier", editTagsModifier);
 	}
 
 	public static void setEditTagsKeyCode(String editTagsKeyCode) {
-		properties.setProperty("editTagsShortcut", editTagsKeyCode);
+		userProperties.setProperty("editTagsShortcut", editTagsKeyCode);
 	}
 
 	public static String getEditTagsModifier() {
@@ -95,7 +116,7 @@ public class PropertiesInitialiser {
 
 
 	public static void setExternalName(String externalName) {
-		properties.setProperty("imageEditorName",externalName);
+		userProperties.setProperty("imageEditorName",externalName);
 	}
 
 
@@ -107,14 +128,14 @@ public class PropertiesInitialiser {
 
 
 	public static void setExternalPath(String imageEditorPath) {
-		properties.setProperty("imageEditorPath",imageEditorPath);
+		userProperties.setProperty("imageEditorPath",imageEditorPath);
 	}
 
 
 
 	public static void storeConfigValues(){
 		try {
-			properties.store(new PrintWriter("res/config.properties"), null);
+			userProperties.store(new PrintWriter("res/userConfig.properties"), null);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -122,7 +143,7 @@ public class PropertiesInitialiser {
 
 	
 	public static void setImportShortCutKeyCode(String importShortCutKeyCode) {
-		properties.setProperty("importShortCutKeyCode", importShortCutKeyCode);
+		userProperties.setProperty("importShortCutKeyCode", importShortCutKeyCode);
 		
 	}
 
@@ -132,7 +153,7 @@ public class PropertiesInitialiser {
 
 
 	public static void setImportShortCutModifier(String importShortCutModifier) {
-		properties.setProperty("importShortCutModifier", importShortCutModifier);
+		userProperties.setProperty("importShortCutModifier", importShortCutModifier);
 		
 	}
 
@@ -148,7 +169,7 @@ public class PropertiesInitialiser {
 	}
 
 	public static void setRenameShortCutModifier(String renameShortCutModifier) {
-		properties.setProperty("renameShortCutModifier",renameShortCutModifier);
+		userProperties.setProperty("renameShortCutModifier",renameShortCutModifier);
 	}
 
 
@@ -158,7 +179,7 @@ public class PropertiesInitialiser {
 
 
 	public static void setRenameShortCutKeyCode(String renameShortCutKeyCode) {
-		properties.setProperty("renameShortCutKeyCode",renameShortCutKeyCode);
+		userProperties.setProperty("renameShortCutKeyCode",renameShortCutKeyCode);
 	}
 
 
@@ -170,7 +191,7 @@ public class PropertiesInitialiser {
 
 
 	public static void setPhotoInfoShortCutModifier(String photoInfoShortCutModifier) {
-		properties.setProperty("photoInfoShortCutModifier", photoInfoShortCutModifier);
+		userProperties.setProperty("photoInfoShortCutModifier", photoInfoShortCutModifier);
 
 	}
 
@@ -183,7 +204,31 @@ public class PropertiesInitialiser {
 
 
 	public static void setPhotoInfoShortCutKeyCode(String photoInfoShortCutKeyCode) {
-		properties.setProperty("photoInfoShortCutKeyCode", photoInfoShortCutKeyCode);
+		userProperties.setProperty("photoInfoShortCutKeyCode", photoInfoShortCutKeyCode);
+	}
+
+
+
+	public static String getDeletePhotoShortCutModifier() {
+		return deletePhotoShortCutModifier;
+	}
+
+
+
+	public static String getDeletePhotoShortCutKeyCode() {
+		return deletePhotoShortCutKeyCode;
+	}
+
+
+
+	public static void setDeletePhotoShortCutModifier(String deletePhotoShortCutModifier) {
+		userProperties.setProperty("deletePhotoShortCutModifier",deletePhotoShortCutModifier);
+	}
+
+
+
+	public static void setDeletePhotoShortCutKeyCode(String deletePhotoShortCutKeyCode) {
+		userProperties.setProperty("deletePhotoShortCutKeyCode",deletePhotoShortCutKeyCode);
 	}
 
 
