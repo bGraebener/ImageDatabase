@@ -9,8 +9,6 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -21,13 +19,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.Photo;
 import utilWindows.wizard.view.LocationChooserWindow;
 import utilWindows.wizard.view.WizardPreviewWindow;
 import utilWindows.wizard.view.WizardTagWindow;
 import utils.BasicOperations;
+import utils.PropertiesInitialiser;
 
 //FIXME Refactor!!!!!
 
@@ -63,6 +61,8 @@ public class WizardController implements Initializable {
 	private Stage stage;
 	private ProgressBar pb;
 
+	private ResourceBundle resources;
+	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 
@@ -70,6 +70,8 @@ public class WizardController implements Initializable {
 
 		mainContainer.getChildren().add(0, locationChooser.getImagesLocationPane());
 
+		this.resources = PropertiesInitialiser.getResources();
+		
 		backBtn.setDisable(true);
 		nextBtn.requestFocus();
 
@@ -172,9 +174,9 @@ public class WizardController implements Initializable {
 		if (locationChooser.skipPreview()) {
 
 			if (locationChooser.getListOfPaths() == null || locationChooser.getListOfPaths().isEmpty()) {
-				Alert alert = BasicOperations.showErrorAlert("Keine Dateien gefunden",
-						"In dem gewählten Ordner befinden sich keine Dateien der unterstützten Formate.",
-						"Bitte wählen sie einen anderen Ordner!");
+				Alert alert = BasicOperations.showErrorAlert(resources.getString("noFilesFoundAlertTitle"),
+						resources.getString("noFilesFoundAlertHeader"),
+						resources.getString("noFilesFoundAlertContent"));
 				alert.showAndWait();
 				return;
 			}
@@ -187,8 +189,8 @@ public class WizardController implements Initializable {
 		}
 
 		if (importedList == null || importedList.isEmpty()) {
-			Alert alert = BasicOperations.showErrorAlert("Keine Fotos gewählt", null,
-					"Bitte wählen sie Fotos bevor sie fortfahren.");
+			Alert alert = BasicOperations.showErrorAlert(resources.getString("noPhotosSelectedAlertTitle"), null,
+					resources.getString("noPhotosSelectedAlertContent"));
 			alert.showAndWait();
 			return;
 		}
@@ -196,8 +198,8 @@ public class WizardController implements Initializable {
 		tagsWindow = new WizardTagWindow(mainContainer, filterList);
 
 		mainContainer.getChildren().set(0, tagsWindow.getTagsWindow());
-		currentStage.setTitle("Schlagwörter setzen");
-		nextBtn.setText("Importiere");
+		currentStage.setTitle(resources.getString("currentStageTitle"));
+		nextBtn.setText(resources.getString("nextButtonImport"));
 	}
 
 	/**
@@ -246,7 +248,7 @@ public class WizardController implements Initializable {
 	private void showProgressBarWindow() {
 
 		VBox progressBox = new VBox();
-		Label importProgressLabel = new Label("Kopiere Fotos...");
+		Label importProgressLabel = new Label(resources.getString("copyPhotosLabel"));
 		pb = new ProgressBar();
 		pb.setPrefWidth(300);
 
@@ -256,7 +258,7 @@ public class WizardController implements Initializable {
 		Scene scene = new Scene(progressBox);
 		stage = new Stage();
 		stage.setScene(scene);
-		stage.setTitle("Kopiere Fotos...");
+		stage.setTitle(resources.getString("copyPhotosLabel"));
 
 	}
 

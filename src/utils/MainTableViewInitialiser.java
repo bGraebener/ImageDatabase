@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import javafx.beans.binding.Bindings;
@@ -50,11 +51,8 @@ public class MainTableViewInitialiser {
 	private MainWindowController mainWindowController;
 	private DataFormat customDataFormat;
 	private Tooltip tooltip;
-//	private SortedList<Photo> sortedList;
-
-	// private FullViewWindow = new FullViewWindow(new
-	// ormat("7295847979775465822L"), new Tooltip());
-
+	private ResourceBundle resources;
+	
 	public MainTableViewInitialiser(MainWindowController mainWindowController) {
 
 		this.mainWindowController = mainWindowController;
@@ -62,6 +60,8 @@ public class MainTableViewInitialiser {
 		mainTableView = mainWindowController.getMainTableView();
 
 		customDataFormat = new DataFormat("7295847979775465822L");
+		
+		this.resources = PropertiesInitialiser.getResources();
 
 	}
 
@@ -213,7 +213,7 @@ public class MainTableViewInitialiser {
 	 */
 	private ContextMenu createMainTableContextMenu() {
 
-		MenuItem editTags = new MenuItem("Bearbeite Schlagworte");
+		MenuItem editTags = new MenuItem(resources.getString("editTagsMenuItem"));
 		editTags.setAccelerator(KeyCombination.keyCombination(
 				PropertiesInitialiser.getEditTagsModifier() + "+" + PropertiesInitialiser.getEditTagsKeyCode()));
 		editTags.setOnAction(x -> {
@@ -237,7 +237,7 @@ public class MainTableViewInitialiser {
 			mainTableView.getSelectionModel().clearAndSelect(initialIndex);
 		});
 
-		MenuItem deleteItems = new MenuItem("Markierte Dateien löschen");
+		MenuItem deleteItems = new MenuItem(resources.getString("deleteItemsMenuItem"));
 		deleteItems.setAccelerator(KeyCombination.keyCombination(
 				PropertiesInitialiser.getDeletePhotoShortCutModifier() + "+" + PropertiesInitialiser.getDeletePhotoShortCutKeyCode()));
 		deleteItems.setOnAction((x) -> {
@@ -248,7 +248,7 @@ public class MainTableViewInitialiser {
 			}
 		});
 
-		MenuItem showExifData = new MenuItem("Photo Informationen anzeigen");
+		MenuItem showExifData = new MenuItem(resources.getString("showExifMenuItem"));
 		showExifData.setAccelerator(KeyCombination.keyCombination(PropertiesInitialiser.getPhotoInfoShortCutModifier()
 				+ "+" + PropertiesInitialiser.getPhotoInfoShortCutKeyCode()));
 		showExifData.setOnAction(x -> {
@@ -261,16 +261,23 @@ public class MainTableViewInitialiser {
 			EXIFWindow exifWindow = new EXIFWindow(mainTableView.getSelectionModel().getSelectedItem());
 			exifWindow.showExifWindow();
 
-			// BasicOperations.showExifData(mainTableView.getSelectionModel().getSelectedItems());
+		});
+		
+		MenuItem showInFullView = new MenuItem(resources.getString("fullViewMenuItem"));
+		showInFullView.setAccelerator(KeyCombination.keyCombination(PropertiesInitialiser.getFullViewShortCutModifier() + "+"
+				+ PropertiesInitialiser.getFullViewShortCutKeyCode()));
+		showInFullView.setOnAction(event -> {
+			FullViewWindow fullViewWindow = new FullViewWindow(mainWindowController);
+			fullViewWindow.displayPhotoFullView();
 		});
 
-		MenuItem renameFile = new MenuItem("Datei umbenennen");
+		MenuItem renameFile = new MenuItem(resources.getString("renameMenuItem"));
 		renameFile.setAccelerator(KeyCombination.keyCombination(PropertiesInitialiser.getRenameShortCutModifier() + "+"
 				+ PropertiesInitialiser.getRenameShortCutKeyCode()));
 		renameFile.setOnAction(x -> {
 			if (mainTableView.getSelectionModel().getSelectedItems().size() > 1) {
-				Alert alert = BasicOperations.showErrorAlert("Multiple Dateien ausgewählt", null,
-						"Sie können nur einzelne Dateien umbennen.");
+				Alert alert = BasicOperations.showErrorAlert(resources.getString("renameMenuItemAlertTitle"), null,
+						resources.getString("renameMenuItemAlertContent"));
 				alert.showAndWait();
 				return;
 			}
@@ -288,7 +295,7 @@ public class MainTableViewInitialiser {
 		});
 
 		// DONE change folder location to be shown in explorer to custom folder
-		MenuItem showInExplorer = new MenuItem("In System Explorer anzeigen");
+		MenuItem showInExplorer = new MenuItem(resources.getString("showInExplorerMenuItem"));
 		showInExplorer.setOnAction(x -> {
 			Desktop desktop = Desktop.getDesktop();
 			try {
@@ -298,7 +305,7 @@ public class MainTableViewInitialiser {
 			}
 		});
 
-		Menu openInPlugin = new Menu("Öffnen mit...");
+		Menu openInPlugin = new Menu(resources.getString("openInPluginMenuItem"));
 
 		MenuItem systemPlugin = new MenuItem("System App");
 		systemPlugin.setOnAction(event -> {
@@ -348,7 +355,7 @@ public class MainTableViewInitialiser {
 		SeparatorMenuItem separatorOne = new SeparatorMenuItem();
 		SeparatorMenuItem separatorTwo = new SeparatorMenuItem();
 
-		return new ContextMenu(editTags, showExifData, separatorOne, renameFile, deleteItems, separatorTwo,
+		return new ContextMenu(editTags, showExifData, showInFullView, separatorOne, renameFile, deleteItems, separatorTwo,
 				openInPlugin, showInExplorer);
 
 	}
@@ -370,6 +377,10 @@ public class MainTableViewInitialiser {
 			List<String> filterList = mainWindowController.getFilterListView().getSelectionModel().getSelectedItems();
 			String noFilterString = mainWindowController.getFilterListView().getSelectionModel().getSelectedItem();
 
+			if(noFilterString == null){
+				noFilterString = resources.getString("noFilter");
+			}
+			
 			// FIXME when playing around with selecting two or more filter,
 			// sometimes a npe
 			// gets throwm, and a photo added to the photolist in maintable
@@ -378,15 +389,15 @@ public class MainTableViewInitialiser {
 				 * filter photos inclusively (display photo location if at least
 				 * one tag matches any of the selected filters
 				 */
-				contains = !Collections.disjoint(photo.getTags(), filterList) || noFilterString.equals("Kein Filter")
-						|| (noFilterString.equals("Ohne Schlagwort") && photo.getTags().size() == 0);
+				contains = !Collections.disjoint(photo.getTags(), filterList) || noFilterString.equals(resources.getString("noFilter"))
+						|| (noFilterString.equals(resources.getString("noTags")) && photo.getTags().size() == 0);
 			} else {
 				/*
 				 * filter photos exclusively ( display photo location only if
 				 * its tags matches every selected filter
 				 */
 				// DONE implement exclusive filter
-				contains = photo.getTags().containsAll(filterList) || noFilterString.equals("Kein Filter");
+				contains = photo.getTags().containsAll(filterList) || noFilterString.equals(resources.getString("noFilter"));
 
 			}
 			return contains;

@@ -1,6 +1,8 @@
 package utils;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -20,10 +22,13 @@ import mainWindow.controller.MainWindowController;
 public class FilterListViewInitialiser {
 
 	private MainWindowController mainWindowController;
+	private ResourceBundle resources;
 
 	public FilterListViewInitialiser(MainWindowController mainWindowController) {
 
 		this.mainWindowController = mainWindowController;
+		
+		resources = PropertiesInitialiser.getResources();
 	}
 
 	/**
@@ -57,7 +62,7 @@ public class FilterListViewInitialiser {
 			/*******************************************************************************************************************/
 			// Add filter by dragging files over the filter list
 			cell.setOnDragOver(dragEvent -> {
-				if (cell.getItem() != null && !cell.getItem().isEmpty() && !cell.getItem().equals("Kein Filter")) {
+				if (cell.getItem() != null && !cell.getItem().isEmpty() && !cell.getItem().equals(resources.getString("noFilter"))) {
 					dragEvent.acceptTransferModes(TransferMode.COPY_OR_MOVE);
 
 				}
@@ -98,10 +103,10 @@ public class FilterListViewInitialiser {
 		tooltip.setStyle(" -fx-font-size: 12px; ");
 
 		// DONE after filter gets deleted, isn't removed from filter view list
-		MenuItem removeFilter = new MenuItem("Entferne Filter");
+		MenuItem removeFilter = new MenuItem(resources.getString("filterListRemoveFilterMenuItem"));
 		removeFilter.setOnAction(event -> {
-			Alert alert = BasicOperations.showConfirmationAlert("Entferne Filter", null,
-					"Wollen Sie den Filter und das Schlagwort aus allen Photos entfernen?");
+			Alert alert = BasicOperations.showConfirmationAlert(resources.getString("filterListRemoveAlertTitle"), null,
+					resources.getString("filterListRemoveAlertContent"));
 			Optional<ButtonType> removeFilterAlert = alert.showAndWait();
 
 			if (removeFilterAlert.isPresent() && removeFilterAlert.get() == ButtonType.OK) {
@@ -116,7 +121,18 @@ public class FilterListViewInitialiser {
 				mainWindowController.getFilterListView().getSelectionModel().clearAndSelect(0);
 			}
 		});
-		return new ContextMenu(removeFilter);
+		
+		MenuItem sortFilterList = new MenuItem(resources.getString("sortFilterListMenuItem"));
+		sortFilterList.setOnAction(event -> {
+			
+			mainWindowController.getFilterList().remove(resources.getString("noTags"));
+			mainWindowController.getFilterList().remove(resources.getString("noFilter"));
+			mainWindowController.getFilterList().sort(String::compareTo);
+			mainWindowController.getFilterList().addAll(0, Arrays.asList(resources.getString("noFilter"), resources.getString("noTags")));
+			
+		});
+		
+		return new ContextMenu(removeFilter, sortFilterList);
 	}
 
 	/**
@@ -131,8 +147,8 @@ public class FilterListViewInitialiser {
 		Set<String> tmp = new TreeSet<>();
 
 		mainWindowController.getPhotoList().forEach(photo -> tmp.addAll(photo.getTags()));
-		filterList.add("Kein Filter");
-		filterList.add("Ohne Schlagwort");
+		filterList.add(resources.getString("noFilter"));
+		filterList.add(resources.getString("noTags"));
 		filterList.addAll(tmp);
 
 		return filterList;

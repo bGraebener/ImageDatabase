@@ -50,7 +50,8 @@ import utils.PropertiesInitialiser;
 //TODO Ordenerstruktur erhalten? Ordnername als Schlagwort
 //TODO complete settings window 
 //TODO externe plugins aufrufen
-//TODO localizsation 
+//TODO finish localizsation (tablecolumn headers, labels) 
+
 
 //DONE mehr tablecolumns, (dateiname, ordner, schlagwoerter, hinzugefuegt)
 //DONE implement exif-data display
@@ -94,7 +95,7 @@ public class MainWindowController implements Initializable {
 	@FXML
 	private ListView<String> filterListView;
 	@FXML
-	private Label numOfFilesLabel, mainFolderLabel, pictureInfoLabel;
+	private Label numOfFilesLabel, mainFolderLabel, pictureInfoLabel,  previousSearchLabel;
 	@FXML
 	private TableColumn<Photo, String> tagsColumn, fileNameColumn, addedColumn;
 	@FXML
@@ -104,11 +105,11 @@ public class MainWindowController implements Initializable {
 	@FXML
 	private TextField searchFileTextField;
 	@FXML
-	private Button searchFileBtn;
+	private Button searchFileBtn, importToolBarButton;
 	@FXML
 	private ComboBox<String> prevSearchComboBox;
 	@FXML
-	private MenuItem importPhotosMenuItem;
+	private MenuItem importPhotosMenuItem, openSettingsMenuItem, closeMenuItem;
 
 	private Stage stage;
 	private ObservableList<String> filterList;
@@ -116,6 +117,8 @@ public class MainWindowController implements Initializable {
 	private String mainFolder;
 	private ObservableList<String> prevSearchList;
 	private FilteredList<Photo> filteredPhotosList;
+	
+	private ResourceBundle resources; 
 
 	// private Properties properties;
 
@@ -126,6 +129,8 @@ public class MainWindowController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		
+		this.resources = resources;
 
 		mainFolder = PropertiesInitialiser.getMainFolder();
 
@@ -152,9 +157,8 @@ public class MainWindowController implements Initializable {
 		
 
 		numOfFilesLabel.textProperty()
-//				.bind((Bindings.concat("Anzahl Dateien: ", Bindings.size(mtvi.getSortedList()).asString())));
-		.bind((Bindings.concat("Anzahl Dateien: ", Bindings.size(sortedList).asString())));
-		mainFolderLabel.textProperty().bind(Bindings.format("Speicherort: %s", PropertiesInitialiser.getMainFolder()));
+		.bind((Bindings.concat(resources.getString("numOfFilesLabel"), Bindings.size(sortedList).asString())));
+		mainFolderLabel.textProperty().bind(Bindings.format("%s %s", resources.getString("mainFolderLabel") ,PropertiesInitialiser.getMainFolder()));
 
 		// bottomSeparator.prefWidthProperty().bind(bottomSeparator.getParent().getScene().widthProperty());
 
@@ -186,6 +190,14 @@ public class MainWindowController implements Initializable {
 				.setAccelerator(KeyCombination.keyCombination(PropertiesInitialiser.getImportShortCutModifier() + "+"
 						+ PropertiesInitialiser.getImportShortCutKeyCode()));
 
+		openSettingsMenuItem.setText(resources.getString("openSettingsMenuItem"));
+		importPhotosMenuItem.setText(resources.getString("importPhotosMenuItem"));
+		closeMenuItem.setText(resources.getString("closeMenuItem"));
+		importToolBarButton.setText(resources.getString("importPhotosMenuItem"));
+		searchFileTextField.setPromptText(resources.getString("searchFileTextField"));
+		searchFileBtn.setText(resources.getString("searchFileBtn"));
+		previousSearchLabel.setText(resources.getString("previousSearchLabel"));
+		
 	}
 
 	private void searchPhoto(String userSearch) {
@@ -259,8 +271,8 @@ public class MainWindowController implements Initializable {
 			if (removedPhotoList.size() > 0) {
 				StringBuilder removedFileNames = new StringBuilder();
 				removedPhotoList.forEach(photo -> removedFileNames.append(photo.getPath().getFileName() + "\n"));
-				Alert alert = BasicOperations.showInformationAlert("Dateien gelöscht",
-						"Folgende Dateien wurden nicht mehr im Datenbankordner gefunden \nund aus der Datenbank entfernt: ",
+				Alert alert = BasicOperations.showInformationAlert(resources.getString("removedPhotosAlertTitle"),
+						resources.getString("removedPhotosAlertContent"),
 						removedFileNames.toString());
 				alert.showAndWait();
 			}
@@ -324,7 +336,7 @@ public class MainWindowController implements Initializable {
 
 		Scene scene = new Scene(root);
 		stage.setScene(scene);
-		stage.setTitle("Importiere Dateien und Ordner");
+		stage.setTitle(resources.getString("importWizardStageTitle"));
 		stage.initModality(Modality.APPLICATION_MODAL);
 
 		controller.setCurrentStage(stage);

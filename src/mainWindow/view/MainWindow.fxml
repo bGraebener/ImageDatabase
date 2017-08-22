@@ -17,14 +17,14 @@
 					<menus>
 						<Menu mnemonicParsing="false" text="Datei">
 							<items>
-                        <MenuItem fx:id="importPhotosMenuItem" mnemonicParsing="false" onAction="#importPhotos" text="Importiere Dateien" />
+                        <MenuItem fx:id="importPhotosMenuItem" mnemonicParsing="false" onAction="#importPhotos" />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#openSettingsWindow" text="Einstellungen">
+                        <MenuItem fx:id="openSettingsMenuItem" mnemonicParsing="false" onAction="#openSettingsWindow" text="Einstellungen">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator>
                         </MenuItem>  
-								<MenuItem mnemonicParsing="false" onAction="#close" text="Beenden">
+								<MenuItem fx:id="closeMenuItem" mnemonicParsing="false" onAction="#close">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="E" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                            </accelerator></MenuItem>
@@ -50,7 +50,7 @@
 				</MenuBar>
 				<ToolBar prefHeight="40.0" prefWidth="200.0">
 					<items>
-						<Button mnemonicParsing="false" onAction="#importPhotos" text="Bilder importieren" />
+						<Button fx:id="importToolBarButton" mnemonicParsing="false" onAction="#importPhotos"/>
 					</items>
 					<VBox.margin>
 						<Insets />
@@ -73,7 +73,7 @@
                         </Label>
                         <HBox layoutX="13.0" layoutY="8.0" spacing="10.0">
                            <children>
-                              <TextField fx:id="searchFileTextField" layoutX="13.0" layoutY="8.0" prefHeight="25.0" prefWidth="204.0" promptText="Suche nach Dateien">
+                              <TextField fx:id="searchFileTextField" layoutX="13.0" layoutY="8.0" prefHeight="25.0" prefWidth="204.0">
                                  <HBox.margin>
                                     <Insets left="5.0" />
                                  </HBox.margin>
@@ -84,7 +84,7 @@
                               <Insets top="5.0" />
                            </VBox.margin>
                         </HBox>
-                        <Label text="Vorherige Suchbegriffe">
+                        <Label fx:id="previousSearchLabel" >
                            <VBox.margin>
                               <Insets left="5.0" top="5.0" />
                            </VBox.margin>

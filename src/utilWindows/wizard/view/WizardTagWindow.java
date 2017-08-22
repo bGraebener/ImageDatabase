@@ -9,6 +9,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import utils.PropertiesInitialiser;
 
 
 /**
@@ -27,6 +28,8 @@ public class WizardTagWindow {
 	private ArrayList<String> filterList;
 
 	private Pane mainContainer;
+	
+	private ResourceBundle resources;
 
 	public WizardTagWindow(Pane mainContainer, ArrayList<String> filterList) {
 
@@ -36,6 +39,8 @@ public class WizardTagWindow {
 		filterList.remove("Ohne Schlagwort");
 		
 		defaultPadding = new Insets(35);
+		
+		resources = PropertiesInitialiser.getResources();
 	}
 
 	/**
@@ -44,22 +49,20 @@ public class WizardTagWindow {
 	 */
 	public Pane getTagsWindow() {
 
-		Label generalInfoLabel = new Label(
-				"Fügen sie Schlagworte hinzu, die für alle importierten Bilder gelten sollen! \nSie können mehrere Schlagwörter durch Komma trennen. (z.B. Familie, Urlaub, Sommer)\n"
-				+ "Individuelle Schlagwörter können sie später einzelnen Fotos hinzufügen.");
+		Label generalInfoLabel = new Label(resources.getString("generalInfoLabel"));
 
 		tagsTextField = new TextField();
-		tagsTextField.setPromptText("Hier Schlagwörter hinzufügen");
+		tagsTextField.setPromptText(resources.getString("tagsTextFieldPromptText"));
 		tagsTextField.requestFocus();
 
-		Label listViewInfo = new Label("Fügen sie schon vorhandene Schlagwörten hinzu: ");
+		Label listViewInfo = new Label(resources.getString("listViewInfoLabel"));
 		
 		allCurrentTagsListView = new ListView<>();
 		allCurrentTagsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		allCurrentTagsListView.setItems(FXCollections.observableArrayList(filterList));
 		
 		
-		currentDateAsTag = new CheckBox("Aktuelles Datum als Schlagwort hinzufügen");
+		currentDateAsTag = new CheckBox(resources.getString("currentDateLabel"));
 //		currentDateAsTag.setSelected(true);
 
 		VBox root = new VBox(20, generalInfoLabel, tagsTextField, listViewInfo, allCurrentTagsListView, currentDateAsTag);

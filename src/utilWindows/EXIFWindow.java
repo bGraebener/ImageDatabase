@@ -1,6 +1,7 @@
 package utilWindows;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
@@ -18,6 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.Photo;
+import utils.PropertiesInitialiser;
 
 public class EXIFWindow {
 
@@ -36,11 +38,15 @@ public class EXIFWindow {
 	private String modelString = noValue;
 	private String isoString = noValue;
 	private String flashString = noValue;
+	
+	private ResourceBundle resources;
 
 	public EXIFWindow(Photo photo) {
 
 //		this.photo = photo;
 
+		resources = PropertiesInitialiser.getResources();
+		
 		getMetaData(photo);
 
 		initExifWindow();
@@ -51,18 +57,18 @@ public class EXIFWindow {
 		VBox root = new VBox(15);
 		root.setPadding(new Insets(15));
 
-		Label title = new Label("Exif - Metadaten");
+		Label title = new Label(resources.getString("titleLabel"));
 		title.setStyle("-fx-font-size: 12pt; -fx-font-weight: bold;");
 
 		HBox dataBox = new HBox(15);
 
 		VBox labels = new VBox(10);
-		Label make = new Label("Hersteller: ");
-		Label model = new Label("Modell: ");
-		Label exposure = new Label("Belichtungszeit: ");
-		Label aperture = new Label("Blendenzahl: ");
-		Label iso = new Label("ISO");
-		Label flash = new Label("Blitzlichtmodus: ");
+		Label make = new Label(resources.getString("makeLabel"));
+		Label model = new Label(resources.getString("modelLabel"));
+		Label exposure = new Label(resources.getString("exposureLabel"));
+		Label aperture = new Label(resources.getString("apertureLabel"));
+		Label iso = new Label(resources.getString("isoLabel"));
+		Label flash = new Label(resources.getString("flashLabel"));
 
 		labels.getChildren().addAll(make, model, exposure, aperture, iso, flash);
 
@@ -92,7 +98,7 @@ public class EXIFWindow {
 
 		stage = new Stage();
 		stage.setScene(scene);
-		stage.setTitle("EXIF - Metadaten");
+		stage.setTitle(resources.getString("titleLabel"));
 		stage.initModality(Modality.APPLICATION_MODAL);
 
 	}

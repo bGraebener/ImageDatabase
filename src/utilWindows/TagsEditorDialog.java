@@ -2,6 +2,7 @@ package utilWindows;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.Photo;
 import utils.BasicOperations;
+import utils.PropertiesInitialiser;
 
 //XXX existing tags don't have to be in listview, could be in label
 //DONE add new tag to current tags list
@@ -48,6 +50,7 @@ public class TagsEditorDialog {
 	private ObservableList<String> selectedPhotoTagsList;
 
 	private ObservableList<String> allExistingTags;
+	private ResourceBundle resources;
 
 	public TagsEditorDialog(List<Photo> selectedPhotos, List<String> filterList) {
 
@@ -56,6 +59,8 @@ public class TagsEditorDialog {
 		filterList.remove("Ohne Schlagwort");
 		this.allExistingTags = FXCollections.observableArrayList(filterList);
 
+		resources = PropertiesInitialiser.getResources();
+		
 		showTagsDialog();
 	}
 
@@ -70,11 +75,11 @@ public class TagsEditorDialog {
 		mainVBox.setPrefWidth(407);
 		mainVBox.setPadding(new Insets(10));
 
-		Label selectedTagsLabel = new Label("Alle Schlagwörter der gewählten Photos");
+		Label selectedTagsLabel = new Label(resources.getString("selectedTagsLabel"));
 		selectedTagsLabel.setPrefWidth(200);
 		selectedTagsLabel.setWrapText(true);
 
-		Label allCurrentLabel = new Label("Alle Schlagwörter");
+		Label allCurrentLabel = new Label(resources.getString("allCurrentTagsLabel"));
 		allCurrentLabel.setPrefWidth(200);
 
 		HBox labelBox = new HBox(10);
@@ -91,7 +96,7 @@ public class TagsEditorDialog {
 		listBox.prefHeight(365.0);
 		listBox.getChildren().addAll(selectedPhotoTagsView, allCurrentTagsView);
 
-		Button removeBtn = new Button("Schlagwort(e) entfernen");
+		Button removeBtn = new Button(resources.getString("removeTagsButton"));
 //		removeBtn.setAlignment(Pos.CENTER_RIGHT);
 //		removeBtn.setTextAlignment(TextAlignment.CENTER);
 		removeBtn.setOnAction((event) -> {
@@ -101,7 +106,7 @@ public class TagsEditorDialog {
 
 			selectedPhotos.forEach(photo -> photo.getTags().removeAll(selectedTags));
 			
-			Alert alert = BasicOperations.showInformationAlert("Schlagwörter entfernt", null, "Die ausgewählten Schlagwörter wurden entfernt.");
+			Alert alert = BasicOperations.showInformationAlert(resources.getString("removedTagsAlertTitle"), null, resources.getString("removedTagsAlertContent"));
 			alert.show();
 
 		});
@@ -109,8 +114,7 @@ public class TagsEditorDialog {
 		textField = new TextField();
 		// textField.setPrefWidth(250);
 
-		Label textFieldLabel = new Label(
-				"Sie können mehrere Schlagwörter durch Komma trennen \n(z.B. Urlaub, Familie)");
+		Label textFieldLabel = new Label(resources.getString("textFieldLabel"));
 		textFieldLabel.setWrapText(true);
 		// textFieldLabel.setPrefWidth(150);
 		textFieldLabel.setPrefHeight(150);
@@ -120,7 +124,7 @@ public class TagsEditorDialog {
 		inputHBox.setPrefWidth(200);
 		inputHBox.getChildren().addAll(textField, textFieldLabel);
 
-		Button addBtn = new Button("Schlagworte hinzufügen");
+		Button addBtn = new Button(resources.getString("addButton"));
 		addBtn.setOnAction((event) -> {
 			addTags();
 			stage.close();
@@ -160,8 +164,8 @@ public class TagsEditorDialog {
 
 		});
 
-		Alert addedTagAlert = BasicOperations.showConfirmationAlert("Schlagworte hinzugefügt", null,
-				"Hinzugefügte Schlagworte: " + tmp.toString().replaceAll("\\[|\\]", ""));
+		Alert addedTagAlert = BasicOperations.showConfirmationAlert(resources.getString("addedAlertTitle"), null,
+				resources.getString("addedAlertContent") + tmp.toString().replaceAll("\\[|\\]", ""));
 		addedTagAlert.show();
 
 	}
@@ -174,7 +178,7 @@ public class TagsEditorDialog {
 
 		Scene scene = new Scene(initialise());
 		stage = new Stage();
-		stage.setTitle("Schlagworte editieren");
+		stage.setTitle(resources.getString("editTagsTitle"));
 
 		scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
 

@@ -1,6 +1,8 @@
 package application;
 
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -10,6 +12,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import mainWindow.controller.MainWindowController;
 import utils.BasicOperations;
+import utils.PropertiesInitialiser;
 
 public class Main extends Application {
 	@Override
@@ -18,6 +21,7 @@ public class Main extends Application {
 
 			
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/mainWindow/view/MainWindow.fxml"));
+			loader.setResources(ResourceBundle.getBundle("res.lang", new Locale(PropertiesInitialiser.getLanguage())));
 
 			BorderPane root = loader.load();
 			MainWindowController controller = loader.getController();

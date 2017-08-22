@@ -3,6 +3,7 @@ package utilWindows.wizard.view;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -24,6 +25,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.Photo;
+import utils.PropertiesInitialiser;
 
 //DONE Vorschau überspringbar machen
 /**
@@ -45,6 +47,8 @@ public class WizardPreviewWindow {
 	private Stage stage;
 	private Thread importThread;
 
+	private ResourceBundle resources;
+	
 	private volatile boolean interrupt = false;
 
 	public WizardPreviewWindow(Pane mainContainer, List<Path> listOfFiles) {
@@ -55,6 +59,8 @@ public class WizardPreviewWindow {
 		defaultPadding = new Insets(15);
 		ds = new DropShadow(5, Color.DARKGREEN);
 		ds.setSpread(0.75);
+		
+		resources= PropertiesInitialiser.getResources();
 	}
 
 	/**
@@ -108,19 +114,19 @@ public class WizardPreviewWindow {
 
 		scrollPane.setContent(tiles);
 
-		Button markAllBtn = new Button("Alle Markieren");
+		Button markAllBtn = new Button(resources.getString("markAllButton"));
 		markAllBtn.setOnAction(event -> {
 
-			if (markAllBtn.getText().equals("Alle Markieren")) {
+			if (markAllBtn.getText().equals(resources.getString("markAllButton"))) {
 				importList.clear();
 				tiles.getChildren().forEach(x -> {
 					importList.add(((Photo) x.getUserData()));
 					x.setEffect(ds);
 				});
-				markAllBtn.setText("Markierung aufheben");
+				markAllBtn.setText(resources.getString("unMarkAllButton"));
 
 			} else {
-				markAllBtn.setText("Alle Markieren");
+				markAllBtn.setText(resources.getString("markAllButton"));
 				tiles.getChildren().forEach(x -> {
 					x.setEffect(null);
 				});
@@ -132,8 +138,7 @@ public class WizardPreviewWindow {
 		ToolBar menuBar = new ToolBar(markAllBtn);
 		menuBar.setPadding(new Insets(5, 0, 5, 15));
 
-		Label label = new Label(
-				"Markieren sie alle Bilder die sie importieren möchten durch einfachen Klick.\nDurch einen weiteren Klick deaktivieren sie die Auswahl wieder.");
+		Label label = new Label(resources.getString("toolBarLabel"));
 		label.setPadding(defaultPadding);
 
 		VBox root = new VBox(label, menuBar, scrollPane);
@@ -149,7 +154,7 @@ public class WizardPreviewWindow {
 		VBox progressBox = new VBox();
 		Label importProgressLabel = new Label();
 		importProgressLabel.textProperty()
-				.bind(Bindings.concat("Importiere Foto: ", counterObservable, " von " + listSize));
+				.bind(Bindings.concat(resources.getString("progressBarLabel"), counterObservable, " / " + listSize));
 		pb = new ProgressBar();
 		Button cancelImportBtn = new Button("Abbrechen");
 		cancelImportBtn.setOnAction(event -> {

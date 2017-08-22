@@ -16,7 +16,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -40,6 +42,12 @@ import model.Photo;
  *
  */
 public class BasicOperations {
+	
+	private static ResourceBundle resources;
+	
+	static{
+		resources = ResourceBundle.getBundle("res.lang", new Locale(PropertiesInitialiser.getLanguage()));
+	}
 
 	/**
 	 * Copies a File from its original location to the applications database
@@ -89,15 +97,15 @@ public class BasicOperations {
 		Path fileName = original.getPath().getFileName();
 		String originalExtension = fileName.toString().substring(fileName.toString().lastIndexOf("."));
 
-		Alert fileExistAlert = showConfirmationAlert("Achtung! Datei existiert am Zielort!",
-				"Die Datei " + original.getPath().getFileName() + " exisitiert schon",
-				"Wollen sie die Datei umbennen?");
+		Alert fileExistAlert = showConfirmationAlert(resources.getString("fileExistAlertTitle"),
+				resources.getString("fileExistAlertHeader") + original.getPath().getFileName(),
+				resources.getString("fileExistAlertContent"));
 		Optional<ButtonType> renameBtn = fileExistAlert.showAndWait();
 
 		if (renameBtn.isPresent()) {
 			if (renameBtn.get() == ButtonType.OK) {
 				TextInputDialog renameDialog = BasicOperations.showTextInputDialog(null, null,
-						"Geben sie einen neuen Dateinamen ein.\nDie Dateiendung wird automatisch hinzugefügt.");
+						resources.getString("renameDialogContent"));
 				fileName = Paths.get(renameDialog.showAndWait().get());
 
 				// check if user added file extension
@@ -129,9 +137,9 @@ public class BasicOperations {
 	public static boolean deleteItems(List<Photo> markedItems) {
 		// DONE dateien loeschen implementieren
 		boolean deleted = false;
-		Alert alert = showConfirmationAlert("Dateien werden gelöscht",
-				"Achtung! \nAlle Dateien werden unwiederbringlich aus der Datenbank und dem Speicherordner gelöscht!",
-				"Sind sie sicher, dass Sie fortfahren wollen?");
+		Alert alert = showConfirmationAlert(resources.getString("deleteConfirmationAlertTitle"),
+				resources.getString("deleteConfirmationAlertHeader"),
+				resources.getString("deleteConfirmationAlertContent"));
 		Optional<ButtonType> delete = alert.showAndWait();
 
 		if (delete.isPresent() && delete.get() == ButtonType.OK) {
@@ -162,9 +170,9 @@ public class BasicOperations {
 		Path fileName = original.getPath().getFileName();
 		String originalExtension = fileName.toString().substring(fileName.toString().lastIndexOf("."));
 
-		TextInputDialog newNameInput = BasicOperations.showTextInputDialog("Datei umbennen",
-				"Geben sie einen neuen Dateinamen ein. Die Dateiendung wird automatisch hinzugefügt.",
-				"Neuer Dateiname:");
+		TextInputDialog newNameInput = BasicOperations.showTextInputDialog(resources.getString("moveConfirmationAlertTitle"),
+				resources.getString("moveConfirmationAlertHeader"),
+				resources.getString("moveConfirmationAlertContent"));
 		Optional<String> newFileName = newNameInput.showAndWait();
 
 		if (newFileName.isPresent() && newFileName.get() != null && !newFileName.get().equals("")) {
@@ -220,9 +228,12 @@ public class BasicOperations {
 			String fileSize = String.format("%.2f", Files.size(photo.getPath()) / 1_000_000f);
 
 			photoInfo
-					.append("Photoinformationen:" + "\n\nDateiname: " + photo.getPath().getFileName() + "\nDateigröße: "
-							+ fileSize + " MB" + "\nDatei erstellt: " + created + "\nLetztes Mal bearbeitet: "
-							+ lastModified + "\nSchlagworte: " + photo.getTags().toString().replaceAll("\\[|\\]", ""));
+					.append(resources.getString("photoInfoTitle") + "\n\n" + 
+							resources.getString("photoInfoFileName") + " " + photo.getPath().getFileName() + "\n" +
+							resources.getString("photoInfoFileSize") + " " +  fileSize + " MB" + "\n" + 
+							resources.getString("photoInfoCreationTime") + " " +  created + "\n" + 
+							resources.getString("photoInfoLastModified") + " " +  lastModified + "\n" + 
+							resources.getString("photoInfoTags") + " " + photo.getTags().toString().replaceAll("\\[|\\]", ""));
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -235,8 +246,8 @@ public class BasicOperations {
 
 		List<String> possibleTags = new ArrayList<>();
 
-		TextInputDialog getNewTagsDialog = showTextInputDialog("Fügen sie Schlagworte hinzu.",
-				"Sie können mehrere Schlagworte durch Komma trennen (z.B. Urlaub, Familie)", "Schlagworte: ");
+		TextInputDialog getNewTagsDialog = showTextInputDialog(resources.getString("newTagsAlertTitle"),
+				resources.getString("newTagsAlertHeader"), resources.getString("newTagsAlertContent"));
 		Optional<String> newTags = getNewTagsDialog.showAndWait();
 
 		if (newTags.isPresent() && newTags.get() != null && !newTags.get().replaceAll("\\s*", "").isEmpty()) {
@@ -254,9 +265,8 @@ public class BasicOperations {
 		String mainFolder = null;
 
 		Alert getMainFolder = new Alert(AlertType.WARNING);
-		getMainFolder.setTitle("Speicherort festlegen");
-		getMainFolder.setHeaderText(
-				"Bitte legen sie einen Ordner fest, der als Speicherort für alle Fotos dient! \nSie können diesen Ort später in den Einstellungen ändern.");
+		getMainFolder.setTitle(resources.getString("getMainFolderAlertTitle"));
+		getMainFolder.setHeaderText(resources.getString("getMainFolderAlertHeader"));
 		getMainFolder.setGraphic(null);
 		HBox hBox = new HBox(10);
 		TextField folderTextField = new TextField();
@@ -298,8 +308,8 @@ public class BasicOperations {
 	public static boolean closeApplication(List<Photo> photoList) {
 		boolean endApp = false;
 
-		Alert alert = BasicOperations.showConfirmationAlert("Programm beenden", null,
-				"Wollen sie das Programm wirklich beenden?");
+		Alert alert = BasicOperations.showConfirmationAlert(resources.getString("closeApplicationAlertTitle"), null,
+				resources.getString("closeApplicationAlertContent"));
 		Optional<ButtonType> end = alert.showAndWait();
 
 		if (end.isPresent() && end.get() == ButtonType.OK) {

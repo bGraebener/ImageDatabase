@@ -9,6 +9,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,6 +26,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import utils.PropertiesInitialiser;
 
 /**
  * A Class that constructs a Pane for the Import Photos Wizard. It manages the
@@ -40,17 +42,17 @@ public class LocationChooserWindow {
 	private CheckBox skipPreviewCheckBox;
 
 	private ObservableList<Path> listOfPaths;
+	private ResourceBundle resources;
 
 	public LocationChooserWindow(Pane mainContainer) {
 		this.mainContainer = mainContainer;
 
+		resources = PropertiesInitialiser.getResources();
 	}
 
 	public Pane getImagesLocationPane() {
 
-		Label welcome = new Label(
-				"Willkommen zum Photo Organiser Wizard!\n\nHier können sie einzelne oder mehrere Dateien "
-						+ "oder ganze Ordner auswählen die sie importieren möchten!");
+		Label welcome = new Label(resources.getString("welcomeLabel"));
 		welcome.setPadding(defaultPadding);
 
 		listOfPaths = FXCollections.observableArrayList();
@@ -88,7 +90,7 @@ public class LocationChooserWindow {
 
 		HBox.setMargin(filesListView, new Insets(0, 0, 0, 15));
 
-		Button browseDirBtn = new Button("Ordner auswählen");
+		Button browseDirBtn = new Button(resources.getString("browseDirButton"));
 		browseDirBtn.setOnAction((event) -> {
 			DirectoryChooser fileChooser = new DirectoryChooser();
 
@@ -103,7 +105,7 @@ public class LocationChooserWindow {
 
 		});
 
-		Button browseFilesBtn = new Button("Dateien auswählen");
+		Button browseFilesBtn = new Button(resources.getString("browseFilesButton"));
 
 		// action handler for files dialog
 		browseFilesBtn.setOnAction((event) -> {
@@ -129,8 +131,7 @@ public class LocationChooserWindow {
 
 		// ********************************************************************************
 		// skip preview button
-		skipPreviewCheckBox = new CheckBox(
-				"Vorschau überspringen (importiert alle im Ordner befindlichen Dateien und Unterordner!)");
+		skipPreviewCheckBox = new CheckBox(resources.getString("skipPreviewCheckBox"));
 		skipPreviewCheckBox.setPadding(defaultPadding);
 
 		// ********************************************************************************
