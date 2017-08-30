@@ -42,10 +42,10 @@ import model.Photo;
  *
  */
 public class BasicOperations {
-	
+
 	private static ResourceBundle resources;
-	
-	static{
+
+	static {
 		resources = ResourceBundle.getBundle("res.lang", new Locale(PropertiesInitialiser.getLanguage()));
 	}
 
@@ -67,14 +67,22 @@ public class BasicOperations {
 		if (Files.exists(mainFolder.resolve(fileName))) {
 
 			possiblePhoto = renameFile(original);
-
-			if (possiblePhoto.isPresent()) {
+			possiblePhoto.ifPresent((photo) -> {
 				try {
-					Files.copy(original.getPath(), possiblePhoto.get().getPath(), StandardCopyOption.COPY_ATTRIBUTES);
+					Files.copy(original.getPath(), photo.getPath(), StandardCopyOption.COPY_ATTRIBUTES);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			}
+			});
+
+			// if (possiblePhoto.isPresent()) {
+			// try {
+			// Files.copy(original.getPath(), possiblePhoto.get().getPath(),
+			// StandardCopyOption.COPY_ATTRIBUTES);
+			// } catch (IOException e) {
+			// e.printStackTrace();
+			// }
+			// }
 
 		} else {
 
@@ -97,9 +105,9 @@ public class BasicOperations {
 		Path fileName = original.getPath().getFileName();
 		String originalExtension = fileName.toString().substring(fileName.toString().lastIndexOf("."));
 
-		Alert fileExistAlert = showConfirmationAlert(resources.getString("fileExistAlertTitle"),
-				resources.getString("fileExistAlertHeader") + original.getPath().getFileName(),
-				resources.getString("fileExistAlertContent"));
+		Alert fileExistAlert = showConfirmationAlert(resources.getString("fileExistsAlertTitle"),
+				resources.getString("fileExistsAlertHeader") + original.getPath().getFileName(),
+				resources.getString("fileExistsAlertContent"));
 		Optional<ButtonType> renameBtn = fileExistAlert.showAndWait();
 
 		if (renameBtn.isPresent()) {
@@ -112,14 +120,19 @@ public class BasicOperations {
 				if (fileName.toString().lastIndexOf(".") < 0) {
 					fileName = Paths.get(fileName + originalExtension);
 				} else {
-					System.out.println(fileName.getFileName().toString().substring(0,
-							fileName.getFileName().toString().lastIndexOf(".")));
+					// System.out.println(fileName.getFileName().toString().substring(0,
+					// fileName.getFileName().toString().lastIndexOf(".")));
 					fileName = Paths.get(fileName.getFileName().toString().substring(0,
 							fileName.getFileName().toString().lastIndexOf(".")) + originalExtension);
 				}
 
-				possiblePhoto = Optional.of(new Photo(mainFolder.resolve(fileName)));
-				// System.out.println(possiblePhoto.isPresent());
+				if (!Files.exists(mainFolder.resolve(fileName))) {
+					possiblePhoto = Optional.of(new Photo(mainFolder.resolve(fileName)));
+					// System.out.println(possiblePhoto.isPresent());
+				}else{
+					BasicOperations.showErrorAlert(resources.getString("couldntRenameTitle"), null,
+							resources.getString("couldntRenameContent")).showAndWait();
+				}
 			}
 
 		}
@@ -170,8 +183,8 @@ public class BasicOperations {
 		Path fileName = original.getPath().getFileName();
 		String originalExtension = fileName.toString().substring(fileName.toString().lastIndexOf("."));
 
-		TextInputDialog newNameInput = BasicOperations.showTextInputDialog(resources.getString("moveConfirmationAlertTitle"),
-				resources.getString("moveConfirmationAlertHeader"),
+		TextInputDialog newNameInput = BasicOperations.showTextInputDialog(
+				resources.getString("moveConfirmationAlertTitle"), resources.getString("moveConfirmationAlertHeader"),
 				resources.getString("moveConfirmationAlertContent"));
 		Optional<String> newFileName = newNameInput.showAndWait();
 
@@ -190,15 +203,20 @@ public class BasicOperations {
 						+ newFileName.get().substring(0, newFileName.get().lastIndexOf(".")) + originalExtension;
 			}
 
-			try {
-				Files.move(original.getPath(), Paths.get(newPath));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			if (!Files.exists(Paths.get(newPath))) {
 
-			Photo newPhoto = new Photo(Paths.get(newPath));
-			newPhoto.getTags().addAll(original.getTags());
-			possiblePhoto = Optional.of(newPhoto);
+				try {
+					Files.move(original.getPath(), Paths.get(newPath));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				Photo newPhoto = new Photo(Paths.get(newPath));
+				newPhoto.getTags().addAll(original.getTags());
+				possiblePhoto = Optional.of(newPhoto);
+			} else {
+				BasicOperations.showErrorAlert(resources.getString("couldntRenameTitle"), null,
+						resources.getString("couldntRenameContent")).showAndWait();
+			}
 		}
 
 		return possiblePhoto;
@@ -227,13 +245,12 @@ public class BasicOperations {
 
 			String fileSize = String.format("%.2f", Files.size(photo.getPath()) / 1_000_000f);
 
-			photoInfo
-					.append(resources.getString("photoInfoTitle") + "\n\n" + 
-							resources.getString("photoInfoFileName") + " " + photo.getPath().getFileName() + "\n" +
-							resources.getString("photoInfoFileSize") + " " +  fileSize + " MB" + "\n" + 
-							resources.getString("photoInfoCreationTime") + " " +  created + "\n" + 
-							resources.getString("photoInfoLastModified") + " " +  lastModified + "\n" + 
-							resources.getString("photoInfoTags") + " " + photo.getTags().toString().replaceAll("\\[|\\]", ""));
+			photoInfo.append(resources.getString("photoInfoTitle") + "\n\n" + resources.getString("photoInfoFileName")
+					+ " " + photo.getPath().getFileName() + "\n" + resources.getString("photoInfoFileSize") + " "
+					+ fileSize + " MB" + "\n" + resources.getString("photoInfoCreationTime") + " " + created + "\n"
+					+ resources.getString("photoInfoLastModified") + " " + lastModified + "\n"
+					+ resources.getString("photoInfoTags") + " "
+					+ photo.getTags().toString().replaceAll("\\[|\\]", ""));
 
 		} catch (IOException e) {
 			e.printStackTrace();

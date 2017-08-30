@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -20,17 +21,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
@@ -119,8 +110,6 @@ public class MainWindowController implements Initializable {
 	private FilteredList<Photo> filteredPhotosList;
 	
 	private ResourceBundle resources; 
-
-	// private Properties properties;
 
 	/**
 	 * Method starts by loading the the config file. It then retrieves the saved
@@ -272,8 +261,14 @@ public class MainWindowController implements Initializable {
 				StringBuilder removedFileNames = new StringBuilder();
 				removedPhotoList.forEach(photo -> removedFileNames.append(photo.getPath().getFileName() + "\n"));
 				Alert alert = BasicOperations.showInformationAlert(resources.getString("removedPhotosAlertTitle"),
-						resources.getString("removedPhotosAlertContent"),
-						removedFileNames.toString());
+						resources.getString("removedPhotosAlertHeader"),
+						null);
+				
+				TextArea removedText = new TextArea(removedFileNames.toString());
+				removedText.setWrapText(true);
+				removedText.setEditable(false);
+				alert.getDialogPane().setExpandableContent(removedText);		
+				alert.getDialogPane().setExpanded(true);
 				alert.showAndWait();
 			}
 			// add new Files from system
@@ -300,8 +295,7 @@ public class MainWindowController implements Initializable {
 				e1.printStackTrace();
 			}
 
-			// photoListFromFile.forEach(photo -> photo.initObservableList());
-			returnList = FXCollections.observableArrayList(photoListFromFile);
+			returnList = photoListFromFile.stream().distinct().collect(Collectors.toCollection(FXCollections::observableArrayList));
 
 		} catch (IOException | ClassNotFoundException e) {
 			e.getStackTrace();

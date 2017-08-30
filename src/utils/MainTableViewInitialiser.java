@@ -146,7 +146,8 @@ public class MainTableViewInitialiser {
 
 					Optional<Photo> possiblePhoto = BasicOperations.copyFile(new Photo(droppedPhoto.toPath()));
 
-					possiblePhoto.ifPresent(photoList::add);
+//					possiblePhoto.ifPresent(photoList::add);
+					possiblePhoto.ifPresent(mainWindowController.getPhotoList()::add);
 
 				});
 				success = true;
